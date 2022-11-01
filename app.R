@@ -1,26 +1,35 @@
-# Load Packages ----
+# songs to poems
+
 library(shiny)
-library(shinydashboard)
 library(shinyBS)
+library(shinydashboard)
 library(shinyWidgets)
 library(boastUtils)
+library(ggplot2)
+library(stats)
+library(Rlab)
+library(dplyr)
 
-# Load additional dependencies and setup functions
-# source("global.R")
+source("~/ShinyApp/Songs_Poems/geniusFix.R")
 
-# Define UI for App ----
+## App Meta Data----------------------------------------------------------------
+APP_TITLE <<- "Sampling Songs to Poems"
+APP_DESCP <<- paste(
+  "This app is designed to ..."
+)
+## End App Meta Data------------------------------------------------------------
+
+# Define UI
 ui <- list(
-  ## Create the app page ----
   dashboardPage(
-    skin = "blue",
-    ### Create the app header ----
+    skin = "red",
     dashboardHeader(
-      title = "App Template", # You may use a shortened form of the title here
+      title = "Songs to Poems", 
       titleWidth = 250,
       tags$li(class = "dropdown", actionLink("info", icon("info"))),
       tags$li(
         class = "dropdown",
-        boastUtils::surveyLink(name = "App_Template")
+        boastUtils::surveyLink(name = "Songs_to_Poems")
       ),
       tags$li(
         class = "dropdown",
@@ -29,187 +38,303 @@ ui <- list(
         )
       )
     ),
-    ### Create the sidebar/left navigation menu ----
+    # Makes Side Panel
     dashboardSidebar(
       width = 250,
       sidebarMenu(
         id = "pages",
-        menuItem("Overview", tabName = "overview", icon = icon("tachometer-alt")),
-        menuItem("Prerequisites", tabName = "prerequisites", icon = icon("book")),
+        menuItem("Overview", tabName = "Overview", icon = icon("tachometer-alt")),
+        menuItem("Prerequisites", tabName = "Prerequisites", icon = icon("book")),
         menuItem("Explore", tabName = "explore", icon = icon("wpexplorer")),
-        menuItem("Challenge", tabName = "challenge", icon = icon("cogs")),
-        menuItem("Game", tabName = "game", icon = icon("gamepad")),
-        menuItem("Wizard", tabName = "wizard", icon = icon("hat-wizard")),
-        menuItem("References", tabName = "references", icon = icon("leanpub"))
+        menuItem("References", tabName = "References", icon = icon("leanpub"))
       ),
+      
       tags$div(
         class = "sidebar-logo",
-        boastUtils::sidebarFooter()
+        boastUtils::psu_eberly_logo("reversed")
       )
     ),
-    ### Create the content ----
     dashboardBody(
+      tags$head(
+        tags$link(
+          rel = "stylesheet", type = "text/css",
+          href = "https://educationshinyappteam.github.io/Style_Guide/theme/boast.css"
+        )
+      ),
+      
+      # Overview Tab
       tabItems(
-        #### Set up the Overview Page ----
         tabItem(
-          tabName = "overview",
+          tabName = "Overview",
           withMathJax(),
-          h1("Sample Application for BOAST Apps"), # This should be the full name.
-          p("This is a sample Shiny application for BOAST. Remember, this page
-            will act like the front page (home page) of your app. Thus you will
-            want to have this page catch attention and describe (in general terms)
-            what the user can do in the rest of the app."),
+          h1("Sampling Songs Lyrics to Poems"),
+          p("This app uses four sampling methods to generate poems from the songs lyrics."),
           h2("Instructions"),
-          p("This information will change depending on what you want to do."),
+          p("In order to use this app more effectively, it is recommended to 
+            explore in the following order."),
           tags$ol(
-            tags$li("Review any prerequiste ideas using the Prerequistes tab."),
-            tags$li("Explore the Exploration Tab."),
-            tags$li("Challenge yourself."),
-            tags$li("Play the game to test how far you've come.")
+            tags$li("Review prerequistes using the Prerequistes tab."),
+            tags$li("When you're ready to start, use the left-hand menu to select 
+                    'Explore'.")
           ),
-          ##### Go Button--location will depend on your goals
+          
+          ### go button
           div(
-            style = "text-align: center;",
+            style = "text-align: center",
             bsButton(
-              inputId = "go1",
+              inputId = "go",
               label = "GO!",
               size = "large",
-              icon = icon("bolt"),
-              style = "default"
+              icon = icon("bolt")
             )
           ),
-          ##### Create two lines of space
-          br(),
           br(),
           h2("Acknowledgements"),
           p(
-            "This version of the app was developed and coded by Neil J.
-            Hatfield  and Robert P. Carey, III.",
-            br(),
-            "We would like to extend a special thanks to the Shiny Program
-            Students.",
-            br(),
-            br(),
-            "Cite this app as:",
-            br(),
-            citeApp(),
-            br(),
-            br(),
-            div(class = "updated", "Last Update: 5/19/2022 by NJH.")
+            "This app was developed and coded by Nurul Syafiqah Hamdi.",
+          br(),
+          br(),
+          br(),
+          div(class = "updated", "Last Update: *date by *initials.")
           )
         ),
-        #### Set up the Prerequisites Page ----
+        
+        #### Set up the Prerequisites Page
+        
         tabItem(
-          tabName = "prerequisites",
+          tabName = "Prerequisites",
           withMathJax(),
           h2("Prerequisites"),
-          p("In order to get the most out of this app, please review the
-            following:"),
-          tags$ul(
-            tags$li("Pre-req 1--Technical/Conceptual Prerequisites are ideas that
-                    users need to have in order to engage with your app fully."),
-            tags$li("Pre-req 2--Contextual Prerequisites refer to any information
-                    about a context in your app that will enrich a user's
-                    understandings."),
-            tags$li("Pre-req 3"),
-            tags$li("Pre-req 4")
-          ),
-          p("Notice the use of an unordered list; users can move through the
-            list any way they wish."),
+          p("In order to get the most out of this app, 
+            please review the following explanations of each sampling methods."),
           box(
-            title = strong("Null Hypothesis Significance Tests (NHSTs)"),
+            title = strong("Simple Random Sampling"),
             status = "primary",
             collapsible = TRUE,
             collapsed = TRUE,
             width = '100%',
-            "In the Confirmatory Data Analysis tradition, null hypothesis
-            significance tests serve as a critical tool to confirm that a
-            particular theoretical model describes our data and to make a
-            generalization from our sample to the broader population
-            (i.e., make an inference). The null hypothesis often reflects the
-            simpler of two models (e.g., 'no statistical difference',
-            'there is an additive difference of 1', etc.) that we will use to
-            build a sampling distribution for our chosen estimator. These
-            methods let us test whether our sample data are consistent with this
-            simple model (null hypothesis)."
+            "SRS explanation."
           ),
           box(
-            title = strong(tags$em("p"), "-values"),
+            title = strong("Systematic Sampling"),
             status = "primary",
             collapsible = TRUE,
-            collapsed = FALSE,
+            collapsed = TRUE,
             width = '100%',
-            "The probability that our selected estimator takes on a value at
-            least as extreme as what we observed given our null hypothesis. If
-            we were to carry out our study infinitely many times and the null
-            hypothesis accurately modeled what we're studying, then we would
-            expect for our estimator to produce a value at least as extreme as
-            what we have seen 100*(p-value)% of the time. The larger the
-            p-value, the more often we would expect our estimator to take on a
-            value at least as extreme as what we've seen; the smaller, the less
-            often."
-          )
-        ),
-        #### Note: you must have at least one of the following pages. You might
-        #### have more than one type and/or more than one of the same type. This
-        #### will be up to you and the goals for your app.
-        #### Set up an Explore Page ----
+            "Systematic sampling explanation here."
+          ),
+          box(
+            title = strong("Cluster Sampling"),
+            status = "primary",
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = '100%',
+            "Clustering sampling explanation here."
+          ),
+          box(
+            title = strong("Stratified Sampling"),
+            status = "primary",
+            collapsible = TRUE,
+            collapsed = TRUE,
+            width = '100%',
+            "Stratified sampling explanation here."
+          ),
+        
+          div(
+            style = "text-align: center",
+            bsButton(
+              inputId = "gop",
+              label = "GO!",
+              size = "large",
+              icon = icon("bolt")
+            )
+          ) # this tab brings to explore (skipping prereq; so must try to go to prereq page first)
+          
+          ),
+        
+        
+        # Set up Explore Page---
         tabItem(
           tabName = "explore",
-          withMathJax(),
-          h2("Explore the Concept"),
-          p("This page should include something for the user to do, the more
-            active and engaging, the better. The purpose of this page is to help
-            the user build a productive understanding of the concept your app
-            is dedicated to."),
-          p("Common elements include graphs, sliders, buttons, etc."),
-          p("The following comes from the NHST Caveats App:"),
+          h2("Sampling Lyrics Songs to Poems"),
+          p("Write some explanation here"),
+          
+          # Layout for the population picker----
+          sidebarLayout(
+            sidebarPanel(
+              width = 6,
+              fluidRow(
+                column(
+                  6,
+                  # Select Input for the distribution type----
+                  
+                  tags$strong("Make Your Selection"),
+                  br(), # add a line
+                  
+                  selectInput(
+                    inputId = "pickSong",
+                    label = "Select a song",
+                    choices = list(
+                      "Bruno Mars - Grenade" = "MarsGrenade",
+                      "Katy Perry - Firework" = "PerryFirework",
+                      "Taylor Swift - Bad Blood" = "SwiftBadBlood",
+                      "Shawn Mendes - Stitches" = "MendesStitches",
+                      "Celine Dion - My Heart Will Go On" = "DionHeart",
+                      "Miley Cyrus - The Climb" = "CyrusClimb"
+                    )
+                    
+                  ),
+                  
+                  textInput(
+                    inputId = "songTitle",
+                    label = "Song title",
+                    value = "",
+                    width = NULL,
+                    placeholder = NULL
+                  ),
+                  textInput(
+                    inputId = "singerName",
+                    label = "Singer's name",
+                    value = "",
+                    width = NULL,
+                    placeholder = NULL
+                  ),
+                  
+                  selectInput(
+                    inputId = "samplingType", # soon change popDist to: samplingType
+                    label = "Select a sampling method",
+                    choices = list(
+                      "Simple Random Sampling" = "srs",
+                      "Systematic Sampling" = "systematic",
+                      "Cluster Sampling" = "cluster",
+                      "Stratified Sampling" = "stratified"
+                    )
+                  ),
+                  
+#                  selectInput(
+ #                   "popDist",
+  #                  "Population type",
+  #                  list(
+   #                   "Left-skewed" = "leftskewed",
+   #                   "Right-skewed" = "rightskewed",
+    #                  "Symmetric" = "symmetric",
+     #                 "Bimodal" = "bimodal",
+      #                "Astragalus (Bone Die)" = "astragalus",
+       #               "Playlist" = "ipodshuffle",
+        #              "Accident Rate" = "poisson"
+         #           )
+          #        ),
+                  
+                  # Conditional Panel for type of sampling // of population distribution----
+                  # Sample Size for SRS // Left Skewed----
+                  conditionalPanel(
+                    condition = "input.samplingType=='srs'",
+                    sliderInput(
+                      "sampleSize_srs", # change soon to: leftskew to sampleSize_srs 
+                      "Sample Size",
+                      min = 1,
+                      max = 150,
+                      value = 12,
+                      step = 1
+                      
+                    ),
+               
+                  ),
+                  # Sample size for clustering // Right Skewed----
+                  conditionalPanel(
+                    condition = "input.samplingType=='cluster'",
+                    sliderInput(
+                      "sampleSize_clustering", # change soon to: rightskew to sampleSize_clustering
+                      "Sample Size",
+                      min = 1,
+                      max = 150,
+                      value = 12,
+                      step = 1
+                    ),
+             
+                  ),
+                  # k size for systematic //Symmetric----
+                  conditionalPanel(
+                    condition = "input.samplingType=='systematic'",
+                    sliderInput(
+                      "kSystematic", # change soon: inverse to kSystematic
+                      "Number of k",
+                      min = 1,
+                      max = 150,
+                      value = 6,
+                      step = 1
+                    ),
+
+                  ),
+                  # type of Stratification // Bimodal----
+                  conditionalPanel(
+                    condition = "input.samplingType=='stratified'",
+                    
+                    selectInput(
+                      inputId = "typeStratification",
+                      label = "Select type of stratification",
+                      choices = list(
+                        "Words in chorus vs. words NOT in chorus" = "typeChorus",
+                        "Words in title vs. words NOT in title" = "typeTitle"
+                      )
+                    ),
+                    
+                    sliderInput(
+                      "sampleSize_strat", # change soon: poissonmean to sampleSize_strat
+                      "Sample Size",
+                      min = 1,
+                      max = 150,
+                      value = 6,
+                      step = 1
+                    ),
+                    
+                    
+               
+                  ),
+
+                ), 
+                
+              ) # need bracket here?
+
+            ), # End of column for slider inputs
+            
+            # Lyrics output // Population Plot----
+            mainPanel(
+              width = 6,
+              # Plots for each distribution; either histogram or density
+              conditionalPanel(
+                condition = "input.samplingType == 'srs'",
+                uiOutput("plotsrs"),
+                
+              ),
+              conditionalPanel(
+                condition = "input.samplingType == 'cluster'",
+                uiOutput("plotcluster"),
+              ),
+              conditionalPanel(
+                condition = "input.samplingType == 'systematic'",
+                uiOutput("plotsystematic"),
+              ),
+              conditionalPanel(
+                condition = "input.samplingType == 'stratified'",
+                uiOutput("plotstratified"),
+              )
+            )
+          ),
+          br(),
+
         ),
-        #### Set up a Challenge Page ----
+        #### Set up the References Page----
         tabItem(
-          tabName = "challenge",
-          withMathJax(),
-          h2("Challenge Yourself"),
-          p("The general intent of a Challenge page is to have the user take
-            what they learned in an Exploration and apply that knowledge in new
-            contexts/situations. In essence, to have them challenge their
-            understanding by testing themselves."),
-          p("What this page looks like will be up to you. Something you might
-            consider is to re-create the tools of the Exploration page and then
-            a list of questions for the user to then answer.")
-        ),
-        #### Set up a Game Page ----
-        tabItem(
-          tabName = "game",
-          withMathJax(),
-          h2("Practice/Test Yourself with [Type of Game]"),
-          p("On this type of page, you'll set up a game for the user to play.
-            Game types include Tic-Tac-Toe, Matching, and a version Hangman to
-            name a few. If you have ideas for new game type, please let us know.")
-        ),
-        #### Set up a Wizard Page ----
-        tabItem(
-          tabName = "wizard",
-          withMathJax(),
-          h2("Wizard"),
-          p("This page will have a series of inputs and questions for the user to
-            answer/work through in order to have the app create something. These
-            types of Activity pages are currently rare as we try to avoid
-            creating 'calculators' in the BOAST project.")
-        ),
-        #### Set up the References Page ----
-        tabItem(
-          tabName = "references",
+          tabName = "References",
           withMathJax(),
           h2("References"),
-          p("You'll need to fill in this page with all of the appropriate
-            references for your app."),
           p(
             class = "hangingindent",
-            "Bailey, E. (2015). shinyBS: Twitter bootstrap components for shiny.
-            (v0.61). [R package]. Available from
-            https://CRAN.R-project.org/package=shinyBS"
+            "Bailey, E. (2015), shinyBS: Twitter bootstrap components for shiny, R
+          package. Available from https://CRAN.R-project.org/package=shinyBS"
           ),
+
           br(),
           br(),
           br(),
@@ -220,23 +345,121 @@ ui <- list(
   )
 )
 
-# Define server logic ----
-server <- function(input, output, session) {
+server <- function(session, input, output) {
+  
+  # Info Button in upper corner
+  observeEvent(input$info, {
+    sendSweetAlert(
+      session = session,
+      title = "Instructions:",
+      type = NULL,
+      closeOnClickOutside = TRUE,
+      text = "Use the ..."
+    )
+  })
+  # Go Button
+  observeEvent(input$go, {
+    updateTabItems(session, "pages", "Prerequisites")
+  })
+  
+  # Go Button
+  observeEvent(input$gop, {
+    updateTabItems(session, "pages", "explore")
+  })
+  
 
-  ## Set up Info button ----
-  observeEvent(
-    eventExpr = input$info,
-    handlerExpr = {
-      sendSweetAlert(
-        session = session,
-        type = "info",
-        title = "Information",
-        text = "This App Template will help you get started building your own app"
-      )
+  # server attempt starts here 
+
+  songLines <- eventReactive(
+    eventExpr = input$pickSong,
+    valueExpr = {switch(
+      EXPR = input$pickSong,
+      MarsGrenade = boastGetLyrics(artistName = "Bruno Mars", songTitle = "Grenade"),
+      PerryFirework = boastGetLyrics(artistName = "Katy Perry", songTitle = "Firework"),
+      SwiftBadBlood = boastGetLyrics(artistName = "Taylor Swift", songTitle = "Bad Blood"),
+      MendesStitches = boastGetLyrics(artistName = "Shawn Mendes", songTitle = "Stitches"),
+      CyrusClimb = boastGetLyrics(artistName = "Miley Cyrus", songTitle = "The Climb"),
+      DionHeart = boastGetLyrics(artistName = "Celine Dion", songTitle = "My Heart Will Go On")
+    )
+    },
+    ignoreNULL = TRUE,
+    ignoreInit = FALSE
+  )
+  
+  
+  songWords <- unnest_tokens(
+    tbl = songLines,
+    output = "word",
+    input = line
+  ) %>%
+    mutate(
+      position = row_number(), 
+      word_in_title = case_when( 
+        tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
+        TRUE ~ "no"
+      ),
+      type = ifelse(section_name == "Chorus", "Chorus", "Not chorus") 
+      
+    )
+  
+  # print(sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE)), quote = FALSE) 
+  # print can't be used here 
+  
+  ###################################################################
+  ##  srs
+  ####################################################################
+  
+  sampleSize_srs <- reactive({
+    input$sampleSize_srs
+  })
+  
+  
+  a <- sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE))
+  
+  
+  output$plotsrs <- renderUI(
+    {
+      
+      expr = paste(a)
+      #quoted = FALSE 
+          
     }
   )
+  
+  
+  
+  
+  
+  
+  ###################################################################
+  ##  clustering
+  ####################################################################
+  
+  sampleSize_clustering <- reactive({
+    11 - 10 * input$sampleSize_clustering
+  })
+  
+  line <- as.vector(songLines$line) 
+  
+  b <- print(sort(sample(x = line, size = input$sampleSize_clustering, replace = FALSE)), quote = FALSE) 
+  
+  output$plotcluster <- renderUI(
+    {
+      
+      paste(b)
+      #quoted = FALSE
+      
+    }
+  )
+  
 
+  ###################################################################
+  ##  systematic
+  ####################################################################
+  
+
+  
 }
 
-# Boast App Call ----
 boastUtils::boastApp(ui = ui, server = server)
+
