@@ -10,19 +10,12 @@ library(stats)
 library(Rlab)
 library(dplyr)
 
-source("~/ShinyApp/Songs_Poems/geniusFix.R")
-
-## App Meta Data----------------------------------------------------------------
-APP_TITLE <<- "Sampling Songs to Poems"
-APP_DESCP <<- paste(
-  "This app is designed to ..."
-)
-## End App Meta Data------------------------------------------------------------
-
-# Define UI
+source("geniusFix.R")
+# Define UI ----
 ui <- list(
   dashboardPage(
     skin = "red",
+    ## Header ----
     dashboardHeader(
       title = "Songs to Poems", 
       titleWidth = 250,
@@ -38,7 +31,7 @@ ui <- list(
         )
       )
     ),
-    # Makes Side Panel
+    ## Makes Side Panel ----
     dashboardSidebar(
       width = 250,
       sidebarMenu(
@@ -54,15 +47,9 @@ ui <- list(
         boastUtils::psu_eberly_logo("reversed")
       )
     ),
+    ## Body ----
     dashboardBody(
-      tags$head(
-        tags$link(
-          rel = "stylesheet", type = "text/css",
-          href = "https://educationshinyappteam.github.io/Style_Guide/theme/boast.css"
-        )
-      ),
-      
-      # Overview Tab
+      ### Overview Tab ----
       tabItems(
         tabItem(
           tabName = "Overview",
@@ -80,7 +67,7 @@ ui <- list(
           
           ### go button
           div(
-            style = "text-align: center",
+            style = "text-align: center;",
             bsButton(
               inputId = "go",
               label = "GO!",
@@ -92,15 +79,13 @@ ui <- list(
           h2("Acknowledgements"),
           p(
             "This app was developed and coded by Nurul Syafiqah Hamdi.",
-          br(),
-          br(),
-          br(),
-          div(class = "updated", "Last Update: *date by *initials.")
+            br(),
+            br(),
+            br(),
+            div(class = "updated", "Last Update: *date by *initials.")
           )
         ),
-        
-        #### Set up the Prerequisites Page
-        
+        ### Prerequisites Page ----
         tabItem(
           tabName = "Prerequisites",
           withMathJax(),
@@ -139,7 +124,6 @@ ui <- list(
             width = '100%',
             "Stratified sampling explanation here."
           ),
-        
           div(
             style = "text-align: center",
             bsButton(
@@ -148,160 +132,115 @@ ui <- list(
               size = "large",
               icon = icon("bolt")
             )
-          ) # this tab brings to explore (skipping prereq; so must try to go to prereq page first)
+          ) 
           
-          ),
-        
-        
-        # Set up Explore Page---
+        ),
+        ### Set up Explore Page ----
         tabItem(
           tabName = "explore",
           h2("Sampling Lyrics Songs to Poems"),
           p("Write some explanation here"),
-          
-          # Layout for the population picker----
-          sidebarLayout(
-            sidebarPanel(
+          fluidRow(
+            column(
               width = 6,
-              fluidRow(
-                column(
-                  6,
-                  # Select Input for the distribution type----
-                  
-                  tags$strong("Make Your Selection"),
-                  br(), # add a line
-                  
+              wellPanel(
+                selectInput(
+                  inputId = "pickSong",
+                  label = "Select a song",
+                  choices = list(
+                    "Bruno Mars - Grenade" = "MarsGrenade",
+                    "Katy Perry - Firework" = "PerryFirework",
+                    "Taylor Swift - Bad Blood" = "SwiftBadBlood",
+                    "Shawn Mendes - Stitches" = "MendesStitches",
+                    "Celine Dion - My Heart Will Go On" = "DionHeart",
+                    "Miley Cyrus - The Climb" = "CyrusClimb"
+                  )
+                ),
+                bsButton(inputId = "test", label = "test"),
+                # textInput(
+                #   inputId = "songTitle",
+                #   label = "Song title",
+                #   value = "",
+                #   width = NULL,
+                #   placeholder = NULL
+                # ),
+                # textInput(
+                #   inputId = "singerName",
+                #   label = "Singer's name",
+                #   value = "",
+                #   width = NULL,
+                #   placeholder = NULL
+                # ),
+                selectInput(
+                  inputId = "samplingType", 
+                  label = "Select a sampling method",
+                  choices = list(
+                    "Simple Random Sampling" = "srs",
+                    "Systematic Sampling" = "systematic",
+                    "Cluster Sampling" = "cluster",
+                    "Stratified Sampling" = "stratified"
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.samplingType=='srs'",
+                  sliderInput(
+                    "sampleSize_srs", 
+                    "Sample Size",
+                    min = 1,
+                    max = 150,
+                    value = 12,
+                    step = 1
+                  )
+                ),
+                # Sample size for clustering
+                conditionalPanel(
+                  condition = "input.samplingType=='cluster'",
+                  sliderInput(
+                    "sampleSize_clustering", # change soon to: rightskew to sampleSize_clustering
+                    "Sample Size",
+                    min = 1,
+                    max = 150,
+                    value = 12,
+                    step = 1
+                  ),
+                ),
+                # k size for systematic 
+                conditionalPanel(
+                  condition = "input.samplingType=='systematic'",
+                  sliderInput(
+                    "kSystematic", # change soon: inverse to kSystematic
+                    "Number of k",
+                    min = 1,
+                    max = 150,
+                    value = 6,
+                    step = 1
+                  ),
+                ),
+                # type of Stratification 
+                conditionalPanel(
+                  condition = "input.samplingType=='stratified'",
                   selectInput(
-                    inputId = "pickSong",
-                    label = "Select a song",
+                    inputId = "typeStratification",
+                    label = "Select type of stratification",
                     choices = list(
-                      "Bruno Mars - Grenade" = "MarsGrenade",
-                      "Katy Perry - Firework" = "PerryFirework",
-                      "Taylor Swift - Bad Blood" = "SwiftBadBlood",
-                      "Shawn Mendes - Stitches" = "MendesStitches",
-                      "Celine Dion - My Heart Will Go On" = "DionHeart",
-                      "Miley Cyrus - The Climb" = "CyrusClimb"
-                    )
-                    
-                  ),
-                  
-                  textInput(
-                    inputId = "songTitle",
-                    label = "Song title",
-                    value = "",
-                    width = NULL,
-                    placeholder = NULL
-                  ),
-                  textInput(
-                    inputId = "singerName",
-                    label = "Singer's name",
-                    value = "",
-                    width = NULL,
-                    placeholder = NULL
-                  ),
-                  
-                  selectInput(
-                    inputId = "samplingType", # soon change popDist to: samplingType
-                    label = "Select a sampling method",
-                    choices = list(
-                      "Simple Random Sampling" = "srs",
-                      "Systematic Sampling" = "systematic",
-                      "Cluster Sampling" = "cluster",
-                      "Stratified Sampling" = "stratified"
+                      "Words in chorus vs. words NOT in chorus" = "typeChorus",
+                      "Words in title vs. words NOT in title" = "typeTitle"
                     )
                   ),
-                  
-#                  selectInput(
- #                   "popDist",
-  #                  "Population type",
-  #                  list(
-   #                   "Left-skewed" = "leftskewed",
-   #                   "Right-skewed" = "rightskewed",
-    #                  "Symmetric" = "symmetric",
-     #                 "Bimodal" = "bimodal",
-      #                "Astragalus (Bone Die)" = "astragalus",
-       #               "Playlist" = "ipodshuffle",
-        #              "Accident Rate" = "poisson"
-         #           )
-          #        ),
-                  
-                  # Conditional Panel for type of sampling // of population distribution----
-                  # Sample Size for SRS // Left Skewed----
-                  conditionalPanel(
-                    condition = "input.samplingType=='srs'",
-                    sliderInput(
-                      "sampleSize_srs", # change soon to: leftskew to sampleSize_srs 
-                      "Sample Size",
-                      min = 1,
-                      max = 150,
-                      value = 12,
-                      step = 1
-                      
-                    ),
-               
-                  ),
-                  # Sample size for clustering // Right Skewed----
-                  conditionalPanel(
-                    condition = "input.samplingType=='cluster'",
-                    sliderInput(
-                      "sampleSize_clustering", # change soon to: rightskew to sampleSize_clustering
-                      "Sample Size",
-                      min = 1,
-                      max = 150,
-                      value = 12,
-                      step = 1
-                    ),
-             
-                  ),
-                  # k size for systematic //Symmetric----
-                  conditionalPanel(
-                    condition = "input.samplingType=='systematic'",
-                    sliderInput(
-                      "kSystematic", # change soon: inverse to kSystematic
-                      "Number of k",
-                      min = 1,
-                      max = 150,
-                      value = 6,
-                      step = 1
-                    ),
-
-                  ),
-                  # type of Stratification // Bimodal----
-                  conditionalPanel(
-                    condition = "input.samplingType=='stratified'",
-                    
-                    selectInput(
-                      inputId = "typeStratification",
-                      label = "Select type of stratification",
-                      choices = list(
-                        "Words in chorus vs. words NOT in chorus" = "typeChorus",
-                        "Words in title vs. words NOT in title" = "typeTitle"
-                      )
-                    ),
-                    
-                    sliderInput(
-                      "sampleSize_strat", # change soon: poissonmean to sampleSize_strat
-                      "Sample Size",
-                      min = 1,
-                      max = 150,
-                      value = 6,
-                      step = 1
-                    ),
-                    
-                    
-               
-                  ),
-
-                ), 
-                
-              ) # need bracket here?
-
-            ), # End of column for slider inputs
-            
-            # Lyrics output // Population Plot----
-            mainPanel(
+                  sliderInput(
+                    "sampleSize_strat", # change soon: poissonmean to sampleSize_strat
+                    "Sample Size",
+                    min = 1,
+                    max = 150,
+                    value = 6,
+                    step = 1
+                  )
+                )
+              )
+            ),
+            column(
               width = 6,
-              # Plots for each distribution; either histogram or density
+              h2("Output goes here"),
               conditionalPanel(
                 condition = "input.samplingType == 'srs'",
                 uiOutput("plotsrs"),
@@ -320,11 +259,9 @@ ui <- list(
                 uiOutput("plotstratified"),
               )
             )
-          ),
-          br(),
-
+          )
         ),
-        #### Set up the References Page----
+        ### Set up the References Page----
         tabItem(
           tabName = "References",
           withMathJax(),
@@ -345,9 +282,10 @@ ui <- list(
   )
 )
 
+# Set up server ----
 server <- function(session, input, output) {
   
-  # Info Button in upper corner
+  ## Info Button in upper corner ----
   observeEvent(input$info, {
     sendSweetAlert(
       session = session,
@@ -368,8 +306,8 @@ server <- function(session, input, output) {
   })
   
 
-  # server attempt starts here 
-
+  # # server attempt starts here 
+  # 
   songLines <- eventReactive(
     eventExpr = input$pickSong,
     valueExpr = {switch(
@@ -385,78 +323,84 @@ server <- function(session, input, output) {
     ignoreNULL = TRUE,
     ignoreInit = FALSE
   )
-  
-  
-  songWords <- unnest_tokens(
-    tbl = songLines,
-    output = "word",
-    input = line
-  ) %>%
-    mutate(
-      position = row_number(), 
-      word_in_title = case_when( 
-        tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
-        TRUE ~ "no"
-      ),
-      type = ifelse(section_name == "Chorus", "Chorus", "Not chorus") 
-      
-    )
-  
-  # print(sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE)), quote = FALSE) 
-  # print can't be used here 
-  
-  ###################################################################
-  ##  srs
-  ####################################################################
-  
-  sampleSize_srs <- reactive({
-    input$sampleSize_srs
-  })
-  
-  
-  a <- sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE))
-  
-  
-  output$plotsrs <- renderUI(
-    {
-      
-      expr = paste(a)
-      #quoted = FALSE 
-          
+  observeEvent(
+    eventExpr = input$test,
+    handlerExpr = {
+      print(songLines())
     }
   )
-  
-  
-  
-  
-  
-  
-  ###################################################################
-  ##  clustering
-  ####################################################################
-  
-  sampleSize_clustering <- reactive({
-    11 - 10 * input$sampleSize_clustering
-  })
-  
-  line <- as.vector(songLines$line) 
-  
-  b <- print(sort(sample(x = line, size = input$sampleSize_clustering, replace = FALSE)), quote = FALSE) 
-  
-  output$plotcluster <- renderUI(
-    {
-      
-      paste(b)
-      #quoted = FALSE
-      
-    }
-  )
-  
-
-  ###################################################################
-  ##  systematic
-  ####################################################################
-  
+  # 
+  # 
+  # songWords <- unnest_tokens(
+  #   tbl = songLines,
+  #   output = "word",
+  #   input = line
+  # ) %>%
+  #   mutate(
+  #     position = row_number(), 
+  #     word_in_title = case_when( 
+  #       tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
+  #       TRUE ~ "no"
+  #     ),
+  #     type = ifelse(section_name == "Chorus", "Chorus", "Not chorus") 
+  #     
+  #   )
+  # 
+  # # print(sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE)), quote = FALSE) 
+  # # print can't be used here 
+  # 
+  # ###################################################################
+  # ##  srs
+  # ####################################################################
+  # 
+  # sampleSize_srs <- reactive({
+  #   input$sampleSize_srs
+  # })
+  # 
+  # 
+  # a <- sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE))
+  # 
+  # 
+  # output$plotsrs <- renderUI(
+  #   {
+  #     
+  #     expr = paste(a)
+  #     #quoted = FALSE 
+  #         
+  #   }
+  # )
+  # 
+  # 
+  # 
+  # 
+  # 
+  # 
+  # ###################################################################
+  # ##  clustering
+  # ####################################################################
+  # 
+  # sampleSize_clustering <- reactive({
+  #   11 - 10 * input$sampleSize_clustering
+  # })
+  # 
+  # line <- as.vector(songLines$line) 
+  # 
+  # b <- print(sort(sample(x = line, size = input$sampleSize_clustering, replace = FALSE)), quote = FALSE) 
+  # 
+  # output$plotcluster <- renderUI(
+  #   {
+  #     
+  #     paste(b)
+  #     #quoted = FALSE
+  #     
+  #   }
+  # )
+  # 
+  # 
+  # ###################################################################
+  # ##  systematic
+  # ####################################################################
+  # 
 
   
 }
