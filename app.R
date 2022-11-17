@@ -9,6 +9,7 @@ library(ggplot2)
 library(stats)
 library(Rlab)
 library(dplyr)
+library(stringr)
 
 source("geniusFix.R")
 # Define UI ----
@@ -98,7 +99,8 @@ ui <- list(
             collapsible = TRUE,
             collapsed = TRUE,
             width = '100%',
-            "SRS explanation."
+            "In simple random sampling, we are going to randomly select a number of words from the song lyrics to produce the poem. 
+            Each word in the song lyric has the same chance of being chosen from its population: all words in the song lyric. "
           ),
           box(
             title = strong("Systematic Sampling"),
@@ -106,7 +108,10 @@ ui <- list(
             collapsible = TRUE,
             collapsed = TRUE,
             width = '100%',
-            "Systematic sampling explanation here."
+            "In systematic sampling, the starting point of the element is first selected, and then, we are going to choose 
+            each kth element after the starting point until we reach the desired sample size. If this process takes you 
+            past the end of your population, it then loops back around to the beginning and continues. 
+            The starting point is chosen by randomly sampling the 1:k elements."
           ),
           box(
             title = strong("Cluster Sampling"),
@@ -114,7 +119,11 @@ ui <- list(
             collapsible = TRUE,
             collapsed = TRUE,
             width = '100%',
-            "Clustering sampling explanation here."
+            "In cluster sampling, the population elements are first divided into non-overlapping groups, called a cluster. 
+            The elements in the cluster usually share a similar characteristic. In this application, the cluster is each line of 
+            the song lyric. Then, we are going to select a random sample of clusters, and every 
+            element in the cluster is included in the final sample. That is, we are going to include every word 
+            in the line of the song lyric selected to produce the poem. "
           ),
           box(
             title = strong("Stratified Sampling"),
@@ -122,7 +131,11 @@ ui <- list(
             collapsible = TRUE,
             collapsed = TRUE,
             width = '100%',
-            "Stratified sampling explanation here."
+            "In stratified random sampling, there are two steps to be followed. First, the population elements are divided into homogenous 
+            and non-overlapping groups, called strata. These are determined by a variable or based on specific characteristics. 
+            In this application, we are going to be stratifying words based on either if they are in the chorus or 
+            the title of the song. Second, we are going to randomly select a number of words from each stratum to produce the poem. 
+            That is, we are performing simple random sampling on each stratum in the second step. "
           ),
           div(
             style = "text-align: center",
@@ -156,7 +169,7 @@ ui <- list(
                     "Miley Cyrus - The Climb" = "CyrusClimb"
                   )
                 ),
-                bsButton(inputId = "test", label = "test"),
+                #bsButton(inputId = "test", label = "test"),
                 # textInput(
                 #   inputId = "songTitle",
                 #   label = "Song title",
@@ -164,13 +177,15 @@ ui <- list(
                 #   width = NULL,
                 #   placeholder = NULL
                 # ),
-                # textInput(
-                #   inputId = "singerName",
-                #   label = "Singer's name",
-                #   value = "",
-                #   width = NULL,
-                #   placeholder = NULL
-                # ),
+#                 numericInput(
+#                   inputId = "sampleSize_all",
+#                   label = "Sample Size",
+#                   value = 15,
+#                   min = 1,
+#                   #max = 200,
+ #                  step = 5
+   #              ),
+                
                 selectInput(
                   inputId = "samplingType", 
                   label = "Select a sampling method",
@@ -180,43 +195,10 @@ ui <- list(
                     "Cluster Sampling" = "cluster",
                     "Stratified Sampling" = "stratified"
                   )
-                ),
-                conditionalPanel(
-                  condition = "input.samplingType=='srs'",
-                  sliderInput(
-                    "sampleSize_srs", 
-                    "Sample Size",
-                    min = 1,
-                    max = 150,
-                    value = 12,
-                    step = 1
-                  )
-                ),
-                # Sample size for clustering
-                conditionalPanel(
-                  condition = "input.samplingType=='cluster'",
-                  sliderInput(
-                    "sampleSize_clustering", # change soon to: rightskew to sampleSize_clustering
-                    "Sample Size",
-                    min = 1,
-                    max = 150,
-                    value = 12,
-                    step = 1
-                  ),
-                ),
-                # k size for systematic 
-                conditionalPanel(
-                  condition = "input.samplingType=='systematic'",
-                  sliderInput(
-                    "kSystematic", # change soon: inverse to kSystematic
-                    "Number of k",
-                    min = 1,
-                    max = 150,
-                    value = 6,
-                    step = 1
-                  ),
-                ),
-                # type of Stratification 
+                ),    
+
+                 uiOutput("sampleSize_all1"),
+
                 conditionalPanel(
                   condition = "input.samplingType=='stratified'",
                   selectInput(
@@ -226,39 +208,72 @@ ui <- list(
                       "Words in chorus vs. words NOT in chorus" = "typeChorus",
                       "Words in title vs. words NOT in title" = "typeTitle"
                     )
-                  ),
-                  sliderInput(
-                    "sampleSize_strat", # change soon: poissonmean to sampleSize_strat
-                    "Sample Size",
-                    min = 1,
-                    max = 150,
-                    value = 6,
-                    step = 1
                   )
-                )
+                  
+                ),
+
+                conditionalPanel(
+                  condition = "input.samplingType=='systematic'",
+                  sliderInput(
+                    "kSystematic", # change soon: inverse to kSystematic
+                    "Number of k",
+                    min = 2,
+                    max = 10,   
+                    value = 2,
+                    step = 1
+                  ),
+                ),
+                
+#                sliderInput(
+ #                 "sampleSize_all", 
+  #                "Sample Size",
+   #               min = 1,
+    #              max = 150, 
+     #            value = 12,
+      #           step = 1
+       #         ),
+              
+                # k size for systematic 
+#                conditionalPanel(
+ #                 condition = "input.samplingType=='systematic'",
+  #                sliderInput(
+   #                 "kSystematic", # change soon: inverse to kSystematic
+    #                "Number of k",
+     #               min = 1,
+      #              max = 150,
+       #             value = 6,
+        #            step = 1
+          #      ),
+           #     ),
+                # type of Stratification 
+               
+                bsButton(inputId = "GenPoem", label = "Generate Poem", size = "large")
               )
             ),
+            
             column(
               width = 6,
-              h2("Output goes here"),
+              h2("Poem Generated"),
+              
               conditionalPanel(
-                condition = "input.samplingType == 'srs'",
-                uiOutput("plotsrs"),
+                condition = "input.samplingType == 'cluster' || 'stratified' || 'systematic' || 'srs' ",
+                uiOutput("poem_all"),
                 
-              ),
-              conditionalPanel(
-                condition = "input.samplingType == 'cluster'",
-                uiOutput("plotcluster"),
-              ),
-              conditionalPanel(
-                condition = "input.samplingType == 'systematic'",
-                uiOutput("plotsystematic"),
-              ),
-              conditionalPanel(
-                condition = "input.samplingType == 'stratified'",
-                uiOutput("plotstratified"),
               )
+            #  conditionalPanel(
+            #    condition = "input.samplingType == 'cluster'",
+             #   uiOutput("poem_cluster"),
+            #  ),
+            #  conditionalPanel(
+                #condition = "input.samplingType == 'systematic'",
+               # uiOutput("poem_systematic"),
+              #),
+             # conditionalPanel(
+            #    condition = "input.samplingType == 'stratified'",
+            #   uiOutput("poem_stratified"),
+            #  )
             )
+            
           )
         ),
         ### Set up the References Page----
@@ -323,84 +338,107 @@ server <- function(session, input, output) {
     ignoreNULL = TRUE,
     ignoreInit = FALSE
   )
-  observeEvent(
-    eventExpr = input$test,
-    handlerExpr = {
-      print(songLines())
+ 
+  # observeEvent(
+  #  eventExpr = input$test,
+  #  handlerExpr = {
+  #    print(songWords())
+  #  }
+  # ) 
+  
+  songWords <- eventReactive(
+    eventExpr = songLines(),
+    valueExpr = {
+      unnest_tokens(
+           tbl = songLines(),
+           output = "word",
+           input = line
+         ) %>%
+           mutate(
+             position = row_number(), 
+             word_in_title = case_when( 
+               tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
+               TRUE ~ "no"
+             ),
+             type = ifelse(section_name == "Chorus", "Chorus", "Not chorus") 
+             
+           )
     }
   )
-  # 
-  # 
-  # songWords <- unnest_tokens(
-  #   tbl = songLines,
-  #   output = "word",
-  #   input = line
-  # ) %>%
-  #   mutate(
-  #     position = row_number(), 
-  #     word_in_title = case_when( 
-  #       tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
-  #       TRUE ~ "no"
-  #     ),
-  #     type = ifelse(section_name == "Chorus", "Chorus", "Not chorus") 
-  #     
-  #   )
-  # 
-  # # print(sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE)), quote = FALSE) 
-  # # print can't be used here 
-  # 
-  # ###################################################################
-  # ##  srs
-  # ####################################################################
-  # 
-  # sampleSize_srs <- reactive({
-  #   input$sampleSize_srs
-  # })
-  # 
-  # 
-  # a <- sort(sample(x = songLines$word, size = input$sampleSize_srs, replace = FALSE))
-  # 
-  # 
-  # output$plotsrs <- renderUI(
-  #   {
-  #     
-  #     expr = paste(a)
-  #     #quoted = FALSE 
-  #         
-  #   }
-  # )
-  # 
-  # 
-  # 
-  # 
-  # 
-  # 
-  # ###################################################################
-  # ##  clustering
-  # ####################################################################
-  # 
-  # sampleSize_clustering <- reactive({
-  #   11 - 10 * input$sampleSize_clustering
-  # })
-  # 
-  # line <- as.vector(songLines$line) 
-  # 
-  # b <- print(sort(sample(x = line, size = input$sampleSize_clustering, replace = FALSE)), quote = FALSE) 
-  # 
-  # output$plotcluster <- renderUI(
-  #   {
-  #     
-  #     paste(b)
-  #     #quoted = FALSE
-  #     
-  #   }
-  # )
-  # 
-  # 
-  # ###################################################################
-  # ##  systematic
-  # ####################################################################
-  # 
+  
+  output$sampleSize_all1 <- renderUI({
+    
+    if (input$samplingType == "cluster"){
+      sliderInput("sampleSize_all", "Sample Size", value = 5, min = 1, step = 1, max = nrow(songLines()))
+    }
+    
+    else if (input$samplingType == "systematic"){
+      sliderInput("sampleSize_all", "Sample Size", value = 15, min = 1, step = 1, max = floor(nrow(songWords()) / input$kSystematic))
+    }
+    
+    else {
+      sliderInput("sampleSize_all", "Sample Size", value = 15, min = 1, step = 1, max = nrow(songWords()))
+    }
+
+  })
+  
+  
+  observeEvent(
+    eventExpr = input$GenPoem,  # tied to the button 
+    handlerExp = {
+      if (input$samplingType == "srs"){
+        SampledWords <- songWords() %>% 
+          slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
+          arrange(position)
+        
+      }
+      
+     else if(input$samplingType == "stratified" & input$typeStratification == "typeChorus"){
+        SampledWords <- songWords() %>%
+          group_by(type) %>%
+          slice_sample(n = input$sampleSize_all/2, replace = TRUE) %>% # sample size divided by 2, cause if not it takes the number from both type chorus and non-chorus
+          arrange(position) 
+        
+      }
+      
+     else if(input$samplingType == "stratified" & input$typeStratification == "typeTitle"){
+        SampledWords <- songWords() %>%
+          group_by(word_in_title) %>%
+          slice_sample(n = input$sampleSize_all/2, replace = TRUE) %>% # sample size divided by 2, cause if not it takes the number from both type chorus and non-chorus
+          arrange(position) 
+        
+      }
+      
+     else if(input$samplingType == "cluster"){
+        SampledLines <- songLines() %>%
+          slice_sample(n = input$sampleSize_all, replace = FALSE) 
+        
+      }
+      
+     else if(input$samplingType == "systematic"){
+        SampledWords <- songWords() %>%
+          filter(position %in% seq(from = sample(1:input$kSystematic, 1), to = input$sampleSize_all*input$kSystematic, by = input$kSystematic))
+      
+      } 
+      
+      
+    output$poem_all <- renderUI({
+      
+      if (input$samplingType == "cluster"){
+        paste(SampledLines$line, sep = "\n", collapse = "\n") # HELP: how to make new line for each line?????
+        #paste(str_split(SampledLines$line, pattern = " "))
+      }
+      
+      else{
+       paste(SampledWords$word, sep = "\n", collapse = " ")
+      }
+      
+    })
+    
+    }
+    
+  )
+  
 
   
 }
