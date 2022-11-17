@@ -59,7 +59,7 @@ ui <- list(
           p("This app uses four sampling methods to generate poems from the songs lyrics."),
           h2("Instructions"),
           p("In order to use this app more effectively, it is recommended to 
-            explore in the following order."),
+            explore in the following order:"),
           tags$ol(
             tags$li("Review prerequistes using the Prerequistes tab."),
             tags$li("When you're ready to start, use the left-hand menu to select 
@@ -92,12 +92,12 @@ ui <- list(
           withMathJax(),
           h2("Prerequisites"),
           p("In order to get the most out of this app, 
-            please review the following explanations of each sampling methods."),
+            please review the following explanations of each sampling method."),
           box(
             title = strong("Simple Random Sampling"),
             status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
+            collapsible = FALSE,
+            #collapsed = TRUE,
             width = '100%',
             "In simple random sampling, we are going to randomly select a number of words from the song lyrics to produce the poem. 
             Each word in the song lyric has the same chance of being chosen from its population: all words in the song lyric. "
@@ -105,8 +105,8 @@ ui <- list(
           box(
             title = strong("Systematic Sampling"),
             status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
+            collapsible = FALSE,
+            #collapsed = TRUE,
             width = '100%',
             "In systematic sampling, the starting point of the element is first selected, and then, we are going to choose 
             each kth element after the starting point until we reach the desired sample size. If this process takes you 
@@ -116,8 +116,8 @@ ui <- list(
           box(
             title = strong("Cluster Sampling"),
             status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
+            collapsible = FALSE,
+           # collapsed = TRUE,
             width = '100%',
             "In cluster sampling, the population elements are first divided into non-overlapping groups, called a cluster. 
             The elements in the cluster usually share a similar characteristic. In this application, the cluster is each line of 
@@ -128,8 +128,8 @@ ui <- list(
           box(
             title = strong("Stratified Sampling"),
             status = "primary",
-            collapsible = TRUE,
-            collapsed = TRUE,
+            collapsible = FALSE,
+           # collapsed = TRUE,
             width = '100%',
             "In stratified random sampling, there are two steps to be followed. First, the population elements are divided into homogenous 
             and non-overlapping groups, called strata. These are determined by a variable or based on specific characteristics. 
@@ -152,7 +152,12 @@ ui <- list(
         tabItem(
           tabName = "explore",
           h2("Sampling Lyrics Songs to Poems"),
-          p("Write some explanation here"),
+          p("In this section, you will have the chance to generate poems pulled from some popular songs based on different sampling methods: 
+             stratified, cluster, systematic, and simple random sampling. For the clustering method, each line of a song lyric is the cluster. For other methods, each word in the song lyric is treated as an individual 
+             element for the sampling processes. For stratification, the strata are words in the chorus and words in the title of the song."),
+#          p("First, select a song, then choose a sampling method. For stratification: pick one stratum, and for systematic: pick the number of kth- interval. 
+#            Finally set the sample size you would like to have in your poem by hitting the 'Generate Poem' button. "),
+          br(),
           fluidRow(
             column(
               width = 6,
@@ -197,7 +202,7 @@ ui <- list(
                   )
                 ),    
 
-                 uiOutput("sampleSize_all1"),
+                
 
                 conditionalPanel(
                   condition = "input.samplingType=='stratified'",
@@ -223,6 +228,8 @@ ui <- list(
                     step = 1
                   ),
                 ),
+
+                  uiOutput("sampleSize_all1"),
                 
 #                sliderInput(
  #                 "sampleSize_all", 
@@ -254,7 +261,7 @@ ui <- list(
             column(
               width = 6,
               h2("Poem Generated"),
-              
+              br(),
               conditionalPanel(
                 condition = "input.samplingType == 'cluster' || 'stratified' || 'systematic' || 'srs' ",
                 uiOutput("poem_all"),
