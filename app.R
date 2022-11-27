@@ -5,13 +5,14 @@ library(shinyBS)
 library(shinydashboard)
 library(shinyWidgets)
 library(boastUtils)
-library(ggplot2)
 library(stats)
-library(Rlab)
 library(dplyr)
 library(stringr)
+library(tidytext)
+library(geniusr)
 
 source("geniusFix.R")
+
 # Define UI ----
 ui <- list(
   dashboardPage(
@@ -290,10 +291,56 @@ ui <- list(
           h2("References"),
           p(
             class = "hangingindent",
-            "Bailey, E. (2015), shinyBS: Twitter bootstrap components for shiny, R
-          package. Available from https://CRAN.R-project.org/package=shinyBS"
+            "Bailey E (2022), shinyBS: Twitter Bootstrap Components for Shiny, R package. Available from 
+            https://CRAN.R-project.org/package=shinyBS"
           ),
-
+          p(
+            class = "hangingindent",
+            "Carey R, Hatfield N (2022), boastUtils: BOAST Utilities, R package. Available from 
+             https://github.com/EducationShinyAppTeam/boastUtils"
+          ),
+          p(
+            class = "hangingindent",
+            "Chang W, Cheng J, Allaire J, Sievert C, Schloerke B, Xie Y, Allen J, McPherson J,
+             Dipert A, Borges B (2021), shiny: Web Application Framework for R, R package.   
+             Available from https://CRAN.R-project.org/package=shiny"
+          ),
+          p(
+            class = "hangingindent",
+            "Chang W, Borges Ribeiro B (2021), shinydashboard: Create Dashboards with 'Shiny',
+             R package. Available from https://CRAN.R-project.org/package=shinydashboard"
+          ),
+          p(
+            class = "hangingindent",
+            "Henderson E (2020), geniusr: Tools for Working with the 'Genius' API, R package. 
+             Available from https://CRAN.R-project.org/package=geniusr"
+          ),
+          p(
+            class = "hangingindent",
+            "Perrier V, Meyer F, Granjon D (2022), shinyWidgets: Custom Inputs Widgets for
+             Shiny, R package. Available from https://CRAN.R-project.org/package=shinyWidgets"
+          ),
+          p(
+            class = "hangingindent",
+            "R Core Team (2022), R: A language and environment for statistical computing, R
+             Foundation for Statistical Computing, Vienna, Austria, R package. Available from
+             https://www.R-project.org/"
+          ),
+          p(
+            class = "hangingindent",
+            "Silge J, Robinson D (2016), tidytext: Text Mining and Analysis Using Tidy Data
+             Principles in R, R package. Available from http://dx.doi.org/10.21105/joss.00037"
+          ),
+          p(
+            class = "hangingindent",
+            "Wickham H (2019), stringr: Simple, Consistent Wrappers for Common String
+             Operations, R package. Available from https://CRAN.R-project.org/package=stringr"
+          ),
+          p(
+            class = "hangingindent",
+            "Wickham H, François R, Henry L, Müller K (2022), dplyr: A Grammar of Data
+             Manipulation, R package. Available from https://CRAN.R-project.org/package=dplyr"
+          ),
           br(),
           br(),
           br(),
@@ -340,18 +387,15 @@ server <- function(session, input, output) {
       MendesStitches = boastGetLyrics(artistName = "Shawn Mendes", songTitle = "Stitches"),
       CyrusClimb = boastGetLyrics(artistName = "Miley Cyrus", songTitle = "The Climb"),
       DionHeart = boastGetLyrics(artistName = "Celine Dion", songTitle = "My Heart Will Go On")
-    )
+    ) %>%
+        mutate(line_number = row_number(),
+               words_count = str_count(line, '\\s+')+1,
+               culmul_words = cumsum(words_count))
     },
     ignoreNULL = TRUE,
     ignoreInit = FALSE
   )
  
-  # observeEvent(
-  #  eventExpr = input$test,
-  #  handlerExpr = {
-  #    print(songWords())
-  #  }
-  # ) 
   
   songWords <- eventReactive(
     eventExpr = songLines(),
@@ -367,8 +411,8 @@ server <- function(session, input, output) {
                tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
                TRUE ~ "no"
              ),
-             type = ifelse(section_name == "Chorus", "Chorus", "Not chorus") 
-             
+             type = ifelse(section_name == "Chorus", "Chorus", "Not chorus"), 
+             last_word = ifelse(position == culmul_words, "Yes", "No")
            )
     }
   )
@@ -418,7 +462,8 @@ server <- function(session, input, output) {
       
      else if(input$samplingType == "cluster"){
         SampledLines <- songLines() %>%
-          slice_sample(n = input$sampleSize_all, replace = FALSE) 
+          slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
+          arrange(line_number)
         
       }
       
