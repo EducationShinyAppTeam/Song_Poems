@@ -1,5 +1,3 @@
-# songs to poems
-
 library(shiny)
 library(shinyBS)
 library(shinydashboard)
@@ -10,6 +8,7 @@ library(dplyr)
 library(stringr)
 library(tidytext)
 library(geniusr)
+library(htmltools)
 
 source("geniusFix.R")
 
@@ -175,23 +174,7 @@ ui <- list(
                     "Miley Cyrus - The Climb" = "CyrusClimb"
                   )
                 ),
-                #bsButton(inputId = "test", label = "test"),
-                # textInput(
-                #   inputId = "songTitle",
-                #   label = "Song title",
-                #   value = "",
-                #   width = NULL,
-                #   placeholder = NULL
-                # ),
-#                 numericInput(
-#                   inputId = "sampleSize_all",
-#                   label = "Sample Size",
-#                   value = 15,
-#                   min = 1,
-#                   #max = 200,
- #                  step = 5
-   #              ),
-                
+
                 selectInput(
                   inputId = "samplingType", 
                   label = "Select a sampling method",
@@ -202,8 +185,6 @@ ui <- list(
                     "Stratified Sampling" = "stratified"
                   )
                 ),    
-
-                
 
                 conditionalPanel(
                   condition = "input.samplingType=='stratified'",
@@ -231,29 +212,6 @@ ui <- list(
                 ),
 
                   uiOutput("sampleSize_all1"),
-                
-#                sliderInput(
- #                 "sampleSize_all", 
-  #                "Sample Size",
-   #               min = 1,
-    #              max = 150, 
-     #            value = 12,
-      #           step = 1
-       #         ),
-              
-                # k size for systematic 
-#                conditionalPanel(
- #                 condition = "input.samplingType=='systematic'",
-  #                sliderInput(
-   #                 "kSystematic", # change soon: inverse to kSystematic
-    #                "Number of k",
-     #               min = 1,
-      #              max = 150,
-       #             value = 6,
-        #            step = 1
-          #      ),
-           #     ),
-                # type of Stratification 
                
                 bsButton(inputId = "GenPoem", label = "Generate Poem", size = "large")
               )
@@ -268,18 +226,7 @@ ui <- list(
                 uiOutput("poem_all"),
                 
               )
-            #  conditionalPanel(
-            #    condition = "input.samplingType == 'cluster'",
-             #   uiOutput("poem_cluster"),
-            #  ),
-            #  conditionalPanel(
-                #condition = "input.samplingType == 'systematic'",
-               # uiOutput("poem_systematic"),
-              #),
-             # conditionalPanel(
-            #    condition = "input.samplingType == 'stratified'",
-            #   uiOutput("poem_stratified"),
-            #  )
+
             )
             
           )
@@ -309,6 +256,11 @@ ui <- list(
             class = "hangingindent",
             "Chang W, Borges Ribeiro B (2021), shinydashboard: Create Dashboards with 'Shiny',
              R package. Available from https://CRAN.R-project.org/package=shinydashboard"
+          ),
+          p(
+            class = "hangingindent",
+            "Cheng J, Sievert C, Schloerke B, Chang W, Xie Y, Allen J (2021), _htmltools: Tools for HTML, R package. 
+             Available from https://CRAN.R-project.org/package=htmltools"
           ),
           p(
             class = "hangingindent",
@@ -412,7 +364,7 @@ server <- function(session, input, output) {
                TRUE ~ "no"
              ),
              type = ifelse(section_name == "Chorus", "Chorus", "Not chorus"), 
-             last_word = ifelse(position == culmul_words, "Yes", "No")
+             last_word = ifelse(position == culmul_words, "yes", "no")
            )
     }
   )
@@ -463,7 +415,7 @@ server <- function(session, input, output) {
      else if(input$samplingType == "cluster"){
         SampledLines <- songLines() %>%
           slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
-          arrange(line_number)
+          arrange(line_number) 
         
       }
       
@@ -477,12 +429,24 @@ server <- function(session, input, output) {
     output$poem_all <- renderUI({
       
       if (input$samplingType == "cluster"){
-        paste(SampledLines$line, sep = "\n", collapse = "\n") # HELP: how to make new line for each line?????
-        #paste(str_split(SampledLines$line, pattern = " "))
+        
+        HTML(paste0(SampledLines$line, collapse = "<br>")) 
+        
       }
       
       else{
-       paste(SampledWords$word, sep = "\n", collapse = " ")
+        
+        pastedWord <- NULL
+        
+        for(i in 1:length(SampledWords$word)){
+          pastedWord <- paste(pastedWord, SampledWords$word[i], sep = " ")
+          if(SampledWords$last_word[i] == "yes"){
+            pastedWord <- paste(pastedWord, "<br>")
+          }
+        }
+        
+        HTML(paste0(pastedWord, collapse = " "))
+        
       }
       
     })
