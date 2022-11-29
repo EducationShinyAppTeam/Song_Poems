@@ -154,7 +154,7 @@ ui <- list(
           h2("Sampling Lyrics Songs to Poems"),
           p("In this section, you will have the chance to generate poems pulled from some popular songs based on different sampling methods: 
              stratified, cluster, systematic, and simple random sampling. For the clustering method, each line of a song lyric is the cluster. For other methods, each word in the song lyric is treated as an individual 
-             element for the sampling processes. For stratification, the strata are words in the chorus and words in the title of the song."),
+             element for the sampling processes. For stratification, the strata are words in the chorus and words in the title of the song. The sample size is taken from each stratum."),
 #          p("First, select a song, then choose a sampling method. For stratification: pick one stratum, and for systematic: pick the number of kth- interval. 
 #            Finally set the sample size you would like to have in your poem by hitting the 'Generate Poem' button. "),
           br(),
@@ -166,6 +166,7 @@ ui <- list(
                   inputId = "pickSong",
                   label = "Select a song",
                   choices = list(
+                    "Pick a song" = "NULL",
                     "Bruno Mars - Grenade" = "MarsGrenade",
                     "Katy Perry - Firework" = "PerryFirework",
                     "Taylor Swift - Bad Blood" = "SwiftBadBlood",
@@ -179,6 +180,7 @@ ui <- list(
                   inputId = "samplingType", 
                   label = "Select a sampling method",
                   choices = list(
+                    "Pick a method" = "NULL",
                     "Simple Random Sampling" = "srs",
                     "Systematic Sampling" = "systematic",
                     "Cluster Sampling" = "cluster",
@@ -313,7 +315,7 @@ server <- function(session, input, output) {
       title = "Instructions:",
       type = NULL,
       closeOnClickOutside = TRUE,
-      text = "Use the ..."
+      text = "Use the application to sample songs lyrics to poems."
     )
   })
   # Go Button
@@ -328,11 +330,12 @@ server <- function(session, input, output) {
   
 
   # # server attempt starts here 
-  # 
+  ## Get Song Lines ----
   songLines <- eventReactive(
     eventExpr = input$pickSong,
     valueExpr = {switch(
       EXPR = input$pickSong,
+      `NULL` = NULL,
       MarsGrenade = boastGetLyrics(artistName = "Bruno Mars", songTitle = "Grenade"),
       PerryFirework = boastGetLyrics(artistName = "Katy Perry", songTitle = "Firework"),
       SwiftBadBlood = boastGetLyrics(artistName = "Taylor Swift", songTitle = "Bad Blood"),
@@ -348,7 +351,7 @@ server <- function(session, input, output) {
     ignoreInit = FALSE
   )
  
-  
+  ## Parse Words ----
   songWords <- eventReactive(
     eventExpr = songLines(),
     valueExpr = {
@@ -366,81 +369,75 @@ server <- function(session, input, output) {
              type = ifelse(section_name == "Chorus", "Chorus", "Not chorus"), 
              last_word = ifelse(position == culmul_words, "yes", "no")
            )
-    }
+    },
+    ignoreNULL = TRUE
   )
   
-  output$sampleSize_all1 <- renderUI({
-    
-    if (input$samplingType == "cluster"){
-      sliderInput("sampleSize_all", "Sample Size", value = 5, min = 1, step = 1, max = nrow(songLines()))
-    }
-    
-    else if (input$samplingType == "systematic"){
-      sliderInput("sampleSize_all", "Sample Size", value = 15, min = 1, step = 1, max = floor(nrow(songWords()) / input$kSystematic))
-    }
-    
-    else {
-      sliderInput("sampleSize_all", "Sample Size", value = 15, min = 1, step = 1, max = nrow(songWords()))
-    }
-
-  })
+ 
+  ## Sampling Type Actions ----
+  
+  sampledValues <- reactiveValues(words = NULL, lines = NULL)
+  observeEvent(
+    eventExpr = input$samplingType,
+    handlerExpr = {
+      output$sampleSize_all1 <- renderUI({
+        if (input$samplingType == "cluster"){
+          sliderInput("sampleSize_all", "Sample Size", value = 15, min = 1, step = 1, max = nrow(songLines()))
+        } else if (input$samplingType == "systematic"){
+          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, step = 1, max = floor(nrow(songWords()) / input$kSystematic))
+        } else {
+          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, step = 1, max = nrow(songWords()))
+        }
+      })
+      
+    },
+    ignoreNULL = TRUE,
+    ignoreInit = TRUE
+  )
   
   
   observeEvent(
     eventExpr = input$GenPoem,  # tied to the button 
     handlerExp = {
       if (input$samplingType == "srs"){
-        SampledWords <- songWords() %>% 
+        sampledValues$words <- songWords() %>% 
           slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
           arrange(position)
-        
-      }
-      
-     else if(input$samplingType == "stratified" & input$typeStratification == "typeChorus"){
-        SampledWords <- songWords() %>%
+      } else if (input$samplingType == "stratified" &
+                 input$typeStratification == "typeChorus") {
+        sampledValues$words <- songWords() %>%
           group_by(type) %>%
-          slice_sample(n = input$sampleSize_all/2, replace = TRUE) %>% # sample size divided by 2, cause if not it takes the number from both type chorus and non-chorus
+          slice_sample(n = input$sampleSize_all, replace = TRUE) %>% 
           arrange(position) 
-        
-      }
-      
-     else if(input$samplingType == "stratified" & input$typeStratification == "typeTitle"){
-        SampledWords <- songWords() %>%
+      } else if (input$samplingType == "stratified" &
+                 input$typeStratification == "typeTitle") {
+        sampledValues$words <- songWords() %>%
           group_by(word_in_title) %>%
-          slice_sample(n = input$sampleSize_all/2, replace = TRUE) %>% # sample size divided by 2, cause if not it takes the number from both type chorus and non-chorus
+          slice_sample(n = input$sampleSize_all, replace = TRUE) %>%  
           arrange(position) 
-        
-      }
-      
-     else if(input$samplingType == "cluster"){
-        SampledLines <- songLines() %>%
-          slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
-          arrange(line_number) 
-        
-      }
-      
-     else if(input$samplingType == "systematic"){
-        SampledWords <- songWords() %>%
-          filter(position %in% seq(from = sample(1:input$kSystematic, 1), to = input$sampleSize_all*input$kSystematic, by = input$kSystematic))
-      
+      } else if (input$samplingType == "systematic") {
+        sampledValues$words <- songWords() %>%
+          filter(position %in% seq(
+            from = sample(1:input$kSystematic, 1),
+            to = input$sampleSize_all*input$kSystematic,
+            by = input$kSystematic)
+          )
       } 
-      
-      
-    output$poem_all <- renderUI({
-      
-      if (input$samplingType == "cluster"){
-        
-        HTML(paste0(SampledLines$line, collapse = "<br>")) 
-        
+      else {
+      sampledValues$lines <- songLines() %>%
+        slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
+        arrange(line_number)
       }
       
-      else{
-        
+      
+      output$poem_all <- renderUI({
+        if (input$samplingType == "cluster"){
+        HTML(paste0(sampledValues$lines$line, collapse = "<br>")) 
+      } else {
         pastedWord <- NULL
-        
-        for(i in 1:length(SampledWords$word)){
-          pastedWord <- paste(pastedWord, SampledWords$word[i], sep = " ")
-          if(SampledWords$last_word[i] == "yes"){
+        for(i in 1:length(sampledValues$words$word)){
+          pastedWord <- paste(pastedWord, sampledValues$words$word[i], sep = " ")
+          if(sampledValues$words$last_word[i] == "yes"){
             pastedWord <- paste(pastedWord, "<br>")
           }
         }
