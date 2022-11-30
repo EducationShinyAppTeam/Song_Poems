@@ -56,14 +56,15 @@ ui <- list(
           tabName = "Overview",
           withMathJax(),
           h1("Sampling Songs Lyrics to Poems"),
-          p("This app uses four sampling methods to generate poems from the songs lyrics."),
+          p("This app uses four sampling methods to generate poems from the songs lyrics. Those are cluster, 
+             stratified, systematic and simple random sampling. There are six popular songs you can choose from."),
           h2("Instructions"),
           p("In order to use this app more effectively, it is recommended to 
             explore in the following order:"),
           tags$ol(
-            tags$li("Review prerequistes using the Prerequistes tab."),
+            tags$li("Review prerequistes to understand the technique of each sampling method."),
             tags$li("When you're ready to start, use the left-hand menu to select 
-                    'Explore'.")
+                    'Explore' to generate poems sampled from songs lyrics.")
           ),
           
           ### go button
@@ -83,7 +84,7 @@ ui <- list(
             br(),
             br(),
             br(),
-            div(class = "updated", "Last Update: *date by *initials.")
+            div(class = "updated", "Last Update: 11/30/22 by NSH.")
           )
         ),
         ### Prerequisites Page ----
@@ -151,7 +152,7 @@ ui <- list(
         ### Set up Explore Page ----
         tabItem(
           tabName = "explore",
-          h2("Sampling Lyrics Songs to Poems"),
+          h2("Sampling Songs Lyrics to Poems"),
           p("In this section, you will have the chance to generate poems pulled from some popular songs based on different sampling methods: 
              stratified, cluster, systematic, and simple random sampling. For the clustering method, each line of a song lyric is the cluster. For other methods, each word in the song lyric is treated as an individual 
              element for the sampling processes. For stratification, the strata are words in the chorus and words in the title of the song. The sample size is taken from each stratum."),
@@ -382,7 +383,7 @@ server <- function(session, input, output) {
     handlerExpr = {
       output$sampleSize_all1 <- renderUI({
         if (input$samplingType == "cluster"){
-          sliderInput("sampleSize_all", "Sample Size", value = 15, min = 1, step = 1, max = nrow(songLines()))
+          sliderInput("sampleSize_all", "Sample Size", value = 10, min = 1, step = 1, max = nrow(songLines()))
         } else if (input$samplingType == "systematic"){
           sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, step = 1, max = floor(nrow(songWords()) / input$kSystematic))
         } else {
@@ -441,10 +442,8 @@ server <- function(session, input, output) {
             pastedWord <- paste(pastedWord, "<br>")
           }
         }
-        
         HTML(paste0(pastedWord, collapse = " "))
-        
-      }
+      } 
       
     })
     
