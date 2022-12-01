@@ -56,13 +56,13 @@ ui <- list(
           tabName = "Overview",
           withMathJax(),
           h1("Sampling Songs Lyrics to Poems"),
-          p("This app uses four sampling methods to generate poems from the songs lyrics. Those are cluster, 
+          p("This app uses four sampling methods to generate poems from songs lyrics. Those are cluster, 
              stratified, systematic and simple random sampling. There are six popular songs you can choose from."),
           h2("Instructions"),
           p("In order to use this app more effectively, it is recommended to 
             explore in the following order:"),
           tags$ol(
-            tags$li("Review prerequistes to understand the technique of each sampling method."),
+            tags$li("Review prerequistes to understand how each sampling method works."),
             tags$li("When you're ready to start, use the left-hand menu to select 
                     'Explore' to generate poems sampled from songs lyrics.")
           ),
@@ -82,6 +82,10 @@ ui <- list(
           p(
             "This app was developed and coded by Nurul Syafiqah Hamdi.",
             br(),
+            br(),
+            "Cite this app as:",
+            br(),
+            boastUtils::citeApp(),
             br(),
             br(),
             div(class = "updated", "Last Update: 11/30/22 by NSH.")
@@ -168,7 +172,7 @@ ui <- list(
                   label = "Select a song",
                   choices = list(
                     "Pick a song" = "NULL",
-                    "Bruno Mars - Grenade" = "MarsGrenade",
+                    "Twinkle Twinkle Little Star - Jane & Ann Taylor" = "Twinkle",
                     "Katy Perry - Firework" = "PerryFirework",
                     "Taylor Swift - Bad Blood" = "SwiftBadBlood",
                     "Shawn Mendes - Stitches" = "MendesStitches",
@@ -316,7 +320,7 @@ server <- function(session, input, output) {
       title = "Instructions:",
       type = NULL,
       closeOnClickOutside = TRUE,
-      text = "Use the application to sample songs lyrics to poems."
+      text = "Use the web application to sample song lyrics to create poems."
     )
   })
   # Go Button
@@ -337,7 +341,7 @@ server <- function(session, input, output) {
     valueExpr = {switch(
       EXPR = input$pickSong,
       `NULL` = NULL,
-      MarsGrenade = boastGetLyrics(artistName = "Bruno Mars", songTitle = "Grenade"),
+      Twinkle = boastGetLyrics(artistName = "Children Songs", songTitle = "Twinkle Twinkle Little Star"),
       PerryFirework = boastGetLyrics(artistName = "Katy Perry", songTitle = "Firework"),
       SwiftBadBlood = boastGetLyrics(artistName = "Taylor Swift", songTitle = "Bad Blood"),
       MendesStitches = boastGetLyrics(artistName = "Shawn Mendes", songTitle = "Stitches"),
