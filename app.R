@@ -56,13 +56,15 @@ ui <- list(
           tabName = "Overview",
           withMathJax(),
           h1("Sampling Songs Lyrics to Poems"),
-          p("This app uses four sampling methods to generate poems from songs lyrics. Those are cluster, 
-             stratified, systematic and simple random sampling. There are six popular songs you can choose from."),
+          p("This app uses four sampling methods to generate poems from songs 
+             lyrics. Those are cluster, stratified, systematic and simple 
+             random sampling. There are six popular songs you can choose from."),
           h2("Instructions"),
           p("In order to use this app more effectively, it is recommended to 
             explore in the following order:"),
           tags$ol(
-            tags$li("Review prerequistes to understand how each sampling method works."),
+            tags$li("Review prerequistes to understand how each sampling 
+                    method works."),
             tags$li("When you're ready to start, use the left-hand menu to select 
                     'Explore' to generate poems sampled from songs lyrics.")
           ),
@@ -104,8 +106,10 @@ ui <- list(
             collapsible = FALSE,
             #collapsed = TRUE,
             width = '100%',
-            "In simple random sampling, we are going to randomly select a number of words from the song lyrics to produce the poem. 
-            Each word in the song lyric has the same chance of being chosen from its population: all words in the song lyric. "
+            "In simple random sampling, we are going to randomly select a 
+            number of words from the song lyrics to produce the poem. 
+            Each word in the song lyric has the same chance of being chosen 
+            from its population: all words in the song lyric. "
           ),
           box(
             title = strong("Systematic Sampling"),
@@ -113,9 +117,9 @@ ui <- list(
             collapsible = FALSE,
             #collapsed = TRUE,
             width = '100%',
-            "In systematic sampling, the starting point of the element is first selected, and then, we are going to choose 
-            each kth element after the starting point until we reach the desired sample size. If this process takes you 
-            past the end of your population, it then loops back around to the beginning and continues. 
+            "In systematic sampling, the starting point of the element is first 
+            selected, and then, we are going to choose each kth element after 
+            the starting point until we reach the desired sample size.  
             The starting point is chosen by randomly sampling the 1:k elements."
           ),
           box(
@@ -124,11 +128,14 @@ ui <- list(
             collapsible = FALSE,
            # collapsed = TRUE,
             width = '100%',
-            "In cluster sampling, the population elements are first divided into non-overlapping groups, called a cluster. 
-            The elements in the cluster usually share a similar characteristic. In this application, the cluster is each line of 
-            the song lyric. Then, we are going to select a random sample of clusters, and every 
-            element in the cluster is included in the final sample. That is, we are going to include every word 
-            in the line of the song lyric selected to produce the poem. "
+            "In cluster sampling, the population elements are first divided 
+             into non-overlapping groups, called a cluster. The elements in 
+             the cluster usually share a similar characteristic. In this 
+             application, the cluster is each line of the song lyric. Then, 
+             we are going to select a random sample of clusters, and every 
+             element in the cluster is included in the final sample. That is, 
+             we are going to include every word in the line of the song lyric 
+             selected to produce the poem. "
           ),
           box(
             title = strong("Stratified Sampling"),
@@ -136,11 +143,15 @@ ui <- list(
             collapsible = FALSE,
            # collapsed = TRUE,
             width = '100%',
-            "In stratified random sampling, there are two steps to be followed. First, the population elements are divided into homogenous 
-            and non-overlapping groups, called strata. These are determined by a variable or based on specific characteristics. 
-            In this application, we are going to be stratifying words based on either if they are in the chorus or 
-            the title of the song. Second, we are going to randomly select a number of words from each stratum to produce the poem. 
-            That is, we are performing simple random sampling on each stratum in the second step. "
+            "In stratified random sampling, there are two steps to be followed. 
+             First, the population elements are divided into homogenous 
+             and non-overlapping groups, called strata. These are determined by 
+             a variable or based on specific characteristics. 
+             In this application, we are going to be stratifying words based on 
+             either if they are in the chorus or the title of the song. Second, 
+             we are going to randomly select a number of words from each stratum 
+             to produce the poem. That is, we are performing simple random 
+             sampling on each stratum in the second step. "
           ),
           div(
             style = "text-align: center",
@@ -157,11 +168,14 @@ ui <- list(
         tabItem(
           tabName = "explore",
           h2("Sampling Songs Lyrics to Poems"),
-          p("In this section, you will have the chance to generate poems pulled from some popular songs based on different sampling methods: 
-             stratified, cluster, systematic, and simple random sampling. For the clustering method, each line of a song lyric is the cluster. For other methods, each word in the song lyric is treated as an individual 
-             element for the sampling processes. For stratification, the strata are words in the chorus and words in the title of the song. The sample size is taken from each stratum."),
-#          p("First, select a song, then choose a sampling method. For stratification: pick one stratum, and for systematic: pick the number of kth- interval. 
-#            Finally set the sample size you would like to have in your poem by hitting the 'Generate Poem' button. "),
+          p("In this section, you will have the chance to generate poems 
+            pulled from some popular songs based on different sampling methods: 
+             stratified, cluster, systematic, and simple random sampling. 
+             For the clustering method, each line of a song lyric is the cluster. 
+             For other methods, each word in the song lyric is treated as 
+             an individual element for the sampling processes. For stratification, 
+             the strata are words in the chorus and words in the title of the song. 
+             The sample size is taken from each stratum."),
           br(),
           fluidRow(
             column(
@@ -220,7 +234,8 @@ ui <- list(
 
                   uiOutput("sampleSize_all1"),
                
-                bsButton(inputId = "GenPoem", label = "Generate Poem", size = "large")
+                bsButton(inputId = "GenPoem", label = "Generate Poem", 
+                         size = "large")
               )
             ),
             
@@ -229,7 +244,8 @@ ui <- list(
               h2("Poem Generated"),
               br(),
               conditionalPanel(
-                condition = "input.samplingType == 'cluster' || 'stratified' || 'systematic' || 'srs' ",
+                condition = "input.samplingType == 'cluster' || 'stratified' 
+                             || 'systematic' || 'srs' ",
                 uiOutput("poem_all"),
                 
               )
@@ -245,60 +261,70 @@ ui <- list(
           h2("References"),
           p(
             class = "hangingindent",
-            "Bailey E (2022), shinyBS: Twitter Bootstrap Components for Shiny, R package. Available from 
+            "Bailey E (2022), shinyBS: Twitter Bootstrap Components for Shiny, 
+            R package. Available from 
             https://CRAN.R-project.org/package=shinyBS"
           ),
           p(
             class = "hangingindent",
-            "Carey R, Hatfield N (2022), boastUtils: BOAST Utilities, R package. Available from 
-             https://github.com/EducationShinyAppTeam/boastUtils"
+            "Carey R, Hatfield N (2022), boastUtils: BOAST Utilities, R package. 
+             Available from https://github.com/EducationShinyAppTeam/boastUtils"
           ),
           p(
             class = "hangingindent",
-            "Chang W, Cheng J, Allaire J, Sievert C, Schloerke B, Xie Y, Allen J, McPherson J,
-             Dipert A, Borges B (2021), shiny: Web Application Framework for R, R package.   
+            "Chang W, Cheng J, Allaire J, Sievert C, Schloerke B, Xie Y, 
+             Allen J, McPherson J, Dipert A, Borges B (2021), shiny: 
+             Web Application Framework for R, R package.   
              Available from https://CRAN.R-project.org/package=shiny"
           ),
           p(
             class = "hangingindent",
-            "Chang W, Borges Ribeiro B (2021), shinydashboard: Create Dashboards with 'Shiny',
-             R package. Available from https://CRAN.R-project.org/package=shinydashboard"
+            "Chang W, Borges Ribeiro B (2021), shinydashboard: Create 
+             Dashboards with 'Shiny', R package. Available from 
+             https://CRAN.R-project.org/package=shinydashboard"
           ),
           p(
             class = "hangingindent",
-            "Cheng J, Sievert C, Schloerke B, Chang W, Xie Y, Allen J (2021), _htmltools: Tools for HTML, R package. 
+            "Cheng J, Sievert C, Schloerke B, Chang W, Xie Y, Allen J (2021), 
+             htmltools: Tools for HTML, R package. 
              Available from https://CRAN.R-project.org/package=htmltools"
           ),
           p(
             class = "hangingindent",
-            "Henderson E (2020), geniusr: Tools for Working with the 'Genius' API, R package. 
+            "Henderson E (2020), geniusr: Tools for Working with the 'Genius' 
+             API, R package. 
              Available from https://CRAN.R-project.org/package=geniusr"
           ),
           p(
             class = "hangingindent",
-            "Perrier V, Meyer F, Granjon D (2022), shinyWidgets: Custom Inputs Widgets for
-             Shiny, R package. Available from https://CRAN.R-project.org/package=shinyWidgets"
+            "Perrier V, Meyer F, Granjon D (2022), shinyWidgets: Custom 
+             Inputs Widgets for Shiny, R package. Available from 
+             https://CRAN.R-project.org/package=shinyWidgets"
           ),
           p(
             class = "hangingindent",
-            "R Core Team (2022), R: A language and environment for statistical computing, R
-             Foundation for Statistical Computing, Vienna, Austria, R package. Available from
-             https://www.R-project.org/"
+            "R Core Team (2022), R: A language and environment for statistical 
+             computing, R Foundation for Statistical Computing, Vienna, Austria, 
+             R package. Available from https://www.R-project.org/"
           ),
           p(
             class = "hangingindent",
-            "Silge J, Robinson D (2016), tidytext: Text Mining and Analysis Using Tidy Data
-             Principles in R, R package. Available from http://dx.doi.org/10.21105/joss.00037"
+            "Silge J, Robinson D (2016), tidytext: Text Mining and Analysis 
+             Using Tidy Data
+             Principles in R, R package. Available from 
+             http://dx.doi.org/10.21105/joss.00037"
           ),
           p(
             class = "hangingindent",
-            "Wickham H (2019), stringr: Simple, Consistent Wrappers for Common String
-             Operations, R package. Available from https://CRAN.R-project.org/package=stringr"
+            "Wickham H (2019), stringr: Simple, Consistent Wrappers for 
+             Common String Operations, R package. 
+             Available from https://CRAN.R-project.org/package=stringr"
           ),
           p(
             class = "hangingindent",
-            "Wickham H, François R, Henry L, Müller K (2022), dplyr: A Grammar of Data
-             Manipulation, R package. Available from https://CRAN.R-project.org/package=dplyr"
+            "Wickham H, François R, Henry L, Müller K (2022), 
+             dplyr: A Grammar of Data Manipulation, R package. 
+             Available from https://CRAN.R-project.org/package=dplyr"
           ),
           br(),
           br(),
@@ -341,12 +367,18 @@ server <- function(session, input, output) {
     valueExpr = {switch(
       EXPR = input$pickSong,
       `NULL` = NULL,
-      Twinkle = boastGetLyrics(artistName = "Children Songs", songTitle = "Twinkle Twinkle Little Star"),
-      PerryFirework = boastGetLyrics(artistName = "Katy Perry", songTitle = "Firework"),
-      SwiftBadBlood = boastGetLyrics(artistName = "Taylor Swift", songTitle = "Bad Blood"),
-      MendesStitches = boastGetLyrics(artistName = "Shawn Mendes", songTitle = "Stitches"),
-      CyrusClimb = boastGetLyrics(artistName = "Miley Cyrus", songTitle = "The Climb"),
-      DionHeart = boastGetLyrics(artistName = "Celine Dion", songTitle = "My Heart Will Go On")
+      Twinkle = boastGetLyrics(artistName = "Children Songs", 
+                               songTitle = "Twinkle Twinkle Little Star"),
+      PerryFirework = boastGetLyrics(artistName = "Katy Perry", 
+                                     songTitle = "Firework"),
+      SwiftBadBlood = boastGetLyrics(artistName = "Taylor Swift", 
+                                     songTitle = "Bad Blood"),
+      MendesStitches = boastGetLyrics(artistName = "Shawn Mendes", 
+                                      songTitle = "Stitches"),
+      CyrusClimb = boastGetLyrics(artistName = "Miley Cyrus", 
+                                  songTitle = "The Climb"),
+      DionHeart = boastGetLyrics(artistName = "Celine Dion", 
+                                 songTitle = "My Heart Will Go On")
     ) %>%
         mutate(line_number = row_number(),
                words_count = str_count(line, '\\s+')+1,
@@ -368,7 +400,8 @@ server <- function(session, input, output) {
            mutate(
              position = row_number(), 
              word_in_title = case_when( 
-               tolower(word) %in% strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
+               tolower(word) %in% strsplit(x = tolower(song_name), 
+                                           split = " ")[[1]] ~ "yes", 
                TRUE ~ "no"
              ),
              type = ifelse(section_name == "Chorus", "Chorus", "Not chorus"), 
@@ -387,11 +420,14 @@ server <- function(session, input, output) {
     handlerExpr = {
       output$sampleSize_all1 <- renderUI({
         if (input$samplingType == "cluster"){
-          sliderInput("sampleSize_all", "Sample Size", value = 10, min = 1, step = 1, max = nrow(songLines()))
+          sliderInput("sampleSize_all", "Sample Size", value = 10, min = 1, 
+                      step = 1, max = nrow(songLines()))
         } else if (input$samplingType == "systematic"){
-          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, step = 1, max = floor(nrow(songWords()) / input$kSystematic))
+          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, 
+                      step = 1, max = floor(nrow(songWords()) / input$kSystematic))
         } else {
-          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, step = 1, max = nrow(songWords()))
+          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, 
+                      step = 1, max = nrow(songWords()))
         }
       })
       
