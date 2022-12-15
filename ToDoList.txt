@@ -1,6 +1,7 @@
 # Things Needed for This Version
 1. To lessen the time it takes for sample size slider to appear especially when first run the app and when changing songs.
 2. When changing the songs, sample size slider may disappear. 
+3. There is a glitch when we hit 'generate button' multiple times— the old poems appear first (automatically) until you hit the button. 
 
 
 # Ideas for Future Development
