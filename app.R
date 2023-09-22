@@ -8,9 +8,13 @@ library(dplyr)
 library(stringr)
 library(tidytext)
 library(geniusr)
-library(htmltools)
+# library(htmltools)
+library(googlesheets4)
+library(xml2)
 
-source("geniusFix.R")
+
+# source("geniusFix.R")
+source("boastGetLyrics.R")
 
 # Define UI ----
 ui <- list(
@@ -32,12 +36,12 @@ ui <- list(
         )
       )
     ),
-    ## Makes Side Panel ----
+    ## Side menu ----
     dashboardSidebar(
       width = 250,
       sidebarMenu(
         id = "pages",
-        menuItem("Overview", tabName = "Overview", icon = icon("tachometer-alt")),
+        menuItem("Overview", tabName = "Overview", icon = icon("gauge-high")),
         menuItem("Prerequisites", tabName = "Prerequisites", icon = icon("book")),
         menuItem("Explore", tabName = "explore", icon = icon("wpexplorer")),
         menuItem("References", tabName = "References", icon = icon("leanpub"))
@@ -55,20 +59,19 @@ ui <- list(
         tabItem(
           tabName = "Overview",
           withMathJax(),
-          h1("Sampling Songs Lyrics to Poems"),
-          p("This app uses four sampling methods to generate poems from songs 
-             lyrics. Those are cluster, stratified, systematic and simple 
-             random sampling. There are six popular songs you can choose from."),
+          h1("Sampling Song Lyrics to Poems"),
+          p("This app demonstrates using four common sampling methods to generate
+            poems out of the lyrics from different songs. The different sampling 
+            methods incluce: simple random sampling, systematic sampling, cluster
+            sampling, and stratified sampling."),
           h2("Instructions"),
-          p("In order to use this app more effectively, it is recommended to 
-            explore in the following order:"),
+          p("To get the most out this app, we recommend:"),
           tags$ol(
-            tags$li("Review prerequistes to understand how each sampling 
+            tags$li("Reviewing the prerequistes to understand how each sampling 
                     method works."),
-            tags$li("When you're ready to start, use the left-hand menu to select 
-                    'Explore' to generate poems sampled from songs lyrics.")
+            tags$li("Using these sampling methods to create your own poems on the
+                    Explore page.")
           ),
-          
           ### go button
           div(
             style = "text-align: center;",
@@ -90,7 +93,7 @@ ui <- list(
             boastUtils::citeApp(),
             br(),
             br(),
-            div(class = "updated", "Last Update: 11/30/22 by NSH.")
+            div(class = "updated", "Last Update: 09/22/23 by NJH.")
           )
         ),
         ### Prerequisites Page ----
@@ -98,18 +101,43 @@ ui <- list(
           tabName = "Prerequisites",
           withMathJax(),
           h2("Prerequisites"),
-          p("In order to get the most out of this app, 
-            please review the following explanations of each sampling method."),
+          p("Please review the following explanations of each sampling method
+            used in this app."),
+          box(
+            title = strong("Statistical Sampling vs. Music Sampling"),
+            status = "primary",
+            collapsible = FALSE,
+            width = "100%",
+            "The term ", tags$em("sample"), " refers to a smaller part of a larger
+            whole; for example, a few seconds or a few words from a song. When we
+            purposefully select a portion of a song to reuse in a new song, we 
+            call this act ", tags$em("music sampling."), "Generally speaking, when
+            we music sampling, we know exactly which snippets we want from the
+            start. This is every different from the notion of statistical sampling.
+            In ", tags$em("statistical sampling"), " we do not know what we are 
+            going to end up with as we make use of a random process selection 
+            process. In this app, we use statistical sampling to select words from
+            a song.",
+            footer = p(
+              "You can learn more about music sampling by checking out", tags$a(
+                href = "https://www.tracklib.com/blog/music-sampling-guide",
+                class = "bodylinks",
+                "Tracklib"
+              ), "."
+            )
+          ),
           box(
             title = strong("Simple Random Sampling"),
             status = "primary",
             collapsible = FALSE,
             #collapsed = TRUE,
             width = '100%',
-            "In simple random sampling, we are going to randomly select a 
-            number of words from the song lyrics to produce the poem. 
-            Each word in the song lyric has the same chance of being chosen 
-            from its population: all words in the song lyric. "
+            "To conduct simple random sampling, we first create a set of all of 
+            the individual words that appear in a song's lyrics. Each word appears
+            in the set the same number of times that that word occurs in the song.
+            This set is our population of words in the song. We then conduct a
+            fair lottery where each word has the same chance of being chosen from
+            the population, picking out our desired number of words."
           ),
           box(
             title = strong("Systematic Sampling"),
@@ -117,52 +145,47 @@ ui <- list(
             collapsible = FALSE,
             #collapsed = TRUE,
             width = '100%',
-            "In systematic sampling, the starting point of the element is first 
-            selected, and then, we are going to choose each kth element after 
-            the starting point until we reach the desired sample size.  
-            The starting point is chosen by randomly sampling the 1:k elements."
+            "To carry out systematic sampling, we first organize all of the words
+            into a particular order; the most natural of which in this context is
+            the order in which the words appear in the song. We then decide 
+            the selection interval, ", tags$em("k."), " We will then use a fair
+            lottery to select which of the first ", tags$em("k"), " words we will
+            start with. Once we've selected this word, we will continue to select
+            every ", tags$em("k"), "-th word until we reach our desired sample
+            size."
           ),
           box(
             title = strong("Cluster Sampling"),
             status = "primary",
             collapsible = FALSE,
-           # collapsed = TRUE,
+            # collapsed = TRUE,
             width = '100%',
-            "In cluster sampling, the population elements are first divided 
-             into non-overlapping groups, called a cluster. The elements in 
-             the cluster usually share a similar characteristic. In this 
-             application, the cluster is each line of the song lyric. Then, 
-             we are going to select a random sample of clusters, and every 
-             element in the cluster is included in the final sample. That is, 
-             we are going to include every word in the line of the song lyric 
-             selected to produce the poem. "
+            "To do cluster sampling, we first have to divide the population into
+            non-overlapping groups called clusters. The elements within a cluster
+            are in close proximity to each other. For this app, we have used each
+            line of the song as a cluster. Once we've created the clusters, we 
+            carry out a fair lottery to select a ", tags$em("cluster"), " and 
+            then every element of that cluster is included in our sample. That 
+            means that we'll include every word in each line of the song that we
+            randomly select to create our sample (poem)."
           ),
           box(
             title = strong("Stratified Sampling"),
             status = "primary",
             collapsible = FALSE,
-           # collapsed = TRUE,
+            # collapsed = TRUE,
             width = '100%',
-            "In stratified random sampling, there are two steps to be followed. 
-             First, the population elements are divided into homogenous 
-             and non-overlapping groups, called strata. These are determined by 
-             a variable or based on specific characteristics. 
-             In this application, we are going to be stratifying words based on 
-             either if they are in the chorus or the title of the song. Second, 
-             we are going to randomly select a number of words from each stratum 
-             to produce the poem. That is, we are performing simple random 
-             sampling on each stratum in the second step. "
-          ),
-          div(
-            style = "text-align: center",
-            bsButton(
-              inputId = "gop",
-              label = "GO!",
-              size = "large",
-              icon = icon("bolt")
-            )
-          ) 
-          
+            "When we carry out stratified random sampling, there are two steps 
+            we need to follow. First, we need to divide the population into
+            homogenous and non-overlapping groups called strata ('layers'). We 
+            determine these strata based on what values for specific characteristics
+            the elements have. In this app, we can create strata based off of 
+            whether the word appears in the song's chorus/refrain or if the word
+            is part of the song's title.", br(),
+            "Second, we carry out multiple fair lotteries (i.e., simple random
+            sampling)--one for each stratum. Combining the results of these steps
+            together will yield our final sample."
+          )
         ),
         ### Set up Explore Page ----
         tabItem(
@@ -184,29 +207,9 @@ ui <- list(
                 selectInput(
                   inputId = "pickSong",
                   label = "Select a song",
-                  choices = list(
-                    "Pick a song" = "NULL",
-                    "Twinkle Twinkle Little Star - Jane & Ann Taylor" = "Twinkle",
-                    "Katy Perry - Firework" = "PerryFirework",
-                    "Taylor Swift - Bad Blood" = "SwiftBadBlood",
-                    "Shawn Mendes - Stitches" = "MendesStitches",
-                    "Celine Dion - My Heart Will Go On" = "DionHeart",
-                    "Miley Cyrus - The Climb" = "CyrusClimb"
-                  )
+                  choices = list("Pick a song")
                 ),
-
-                selectInput(
-                  inputId = "samplingType", 
-                  label = "Select a sampling method",
-                  choices = list(
-                    "Pick a method" = "NULL",
-                    "Simple Random Sampling" = "srs",
-                    "Systematic Sampling" = "systematic",
-                    "Cluster Sampling" = "cluster",
-                    "Stratified Sampling" = "stratified"
-                  )
-                ),    
-
+                uiOutput(outputId = "samplingSelector"),
                 conditionalPanel(
                   condition = "input.samplingType=='stratified'",
                   selectInput(
@@ -219,7 +222,6 @@ ui <- list(
                   )
                   
                 ),
-
                 conditionalPanel(
                   condition = "input.samplingType=='systematic'",
                   sliderInput(
@@ -231,30 +233,25 @@ ui <- list(
                     step = 1
                   ),
                 ),
-
-                  uiOutput("sampleSize_all1"),
-               
-                bsButton(inputId = "GenPoem", label = "Generate Poem", 
-                         size = "large")
+                uiOutput("sampleSizeAll"),
+                uiOutput("sampleSize_all1"),
+                bsButton(
+                  inputId = "GenPoem",
+                  label = "Generate Poem", 
+                  size = "large",
+                  disabled = TRUE
+                )
               )
             ),
-            
             column(
               width = 6,
               h2("Poem Generated"),
               br(),
-              conditionalPanel(
-                condition = "input.samplingType == 'cluster' || 'stratified' 
-                             || 'systematic' || 'srs' ",
-                uiOutput("poem_all"),
-                
-              )
-
+              uiOutput(outputId = "poem_all")
             )
-            
           )
         ),
-        ### Set up the References Page----
+        ### References Page----
         tabItem(
           tabName = "References",
           withMathJax(),
@@ -338,51 +335,89 @@ ui <- list(
 
 # Set up server ----
 server <- function(session, input, output) {
-  
+  ## Get Song Information ----
+  gs4_deauth()
+  songDB <- reactiveVal(
+    suppressMessages(read_sheet(
+      ss = "https://docs.google.com/spreadsheets/d/1tF8GsTk-8YVJnUHhpK-8AoNmKK2orzZkJkR6nHier58/edit?usp=sharing"
+    ))
+  )
+    
   ## Info Button in upper corner ----
-  observeEvent(input$info, {
-    sendSweetAlert(
-      session = session,
-      title = "Instructions:",
-      type = NULL,
-      closeOnClickOutside = TRUE,
-      text = "Use the web application to sample song lyrics to create poems."
-    )
-  })
-  # Go Button
-  observeEvent(input$go, {
-    updateTabItems(session, "pages", "Prerequisites")
-  })
+  observeEvent(
+    eventExpr = input$info, 
+    handlerExpr = {
+      print(rawLyrics())
+      sendSweetAlert(
+        session = session,
+        title = "Instructions",
+        type = "info",
+        closeOnClickOutside = TRUE,
+        text = "Use the web application to sample song lyrics to create poems."
+      )
+    }
+  )
   
-  # Go Button
-  observeEvent(input$gop, {
-    updateTabItems(session, "pages", "explore")
-  })
+  # Go Button 1 ----
+  observeEvent(
+    eventExpr = input$go, 
+    handlerExpr = {
+      updateTabItems(
+        session = session, 
+        inputId = "pages", 
+        selected = "explore"
+      )
+    }
+  )
   
+  ## Update song selections ----
+  observeEvent(
+    eventExpr = songDB(),
+    handlerExpr = {
+      songOptions <- paste(songDB()$Song, songDB()$Artist, sep = "--")
+      updateSelectInput(
+        session = session,
+        inputId = "pickSong",
+        choices = c("Pick a song", songOptions)
+      )
+    }
+  )
+  
+  ## Get and store raw lyrics ----
+  rawLyrics <- eventReactive(
+    eventExpr = input$pickSong,
+    valueExpr = {
+      if (input$pickSong == "Pick a song") {
+        rawLyrics <- tibble(
+          line = "No song selected",
+          section_name = "Verse 1", 
+          section_artist = "None",
+          song_name = "None", 
+          artist_name = "None"
+        )
+      } else {
+        songInfo <- str_split_1(string = input$pickSong, pattern = "--")
+        rawLyrics <- boastGetLyrics2(
+          songDB = songDB(),
+          artist = songInfo[2],
+          song = songInfo[1]
+        )
+      }
+      return(rawLyrics)
+    },
+    label = "gettingRawLyrics"
+  )
 
-  # # server attempt starts here 
   ## Get Song Lines ----
   songLines <- eventReactive(
-    eventExpr = input$pickSong,
-    valueExpr = {switch(
-      EXPR = input$pickSong,
-      `NULL` = NULL,
-      Twinkle = boastGetLyrics(artistName = "Children Songs", 
-                               songTitle = "Twinkle Twinkle Little Star"),
-      PerryFirework = boastGetLyrics(artistName = "Katy Perry", 
-                                     songTitle = "Firework"),
-      SwiftBadBlood = boastGetLyrics(artistName = "Taylor Swift", 
-                                     songTitle = "Bad Blood"),
-      MendesStitches = boastGetLyrics(artistName = "Shawn Mendes", 
-                                      songTitle = "Stitches"),
-      CyrusClimb = boastGetLyrics(artistName = "Miley Cyrus", 
-                                  songTitle = "The Climb"),
-      DionHeart = boastGetLyrics(artistName = "Celine Dion", 
-                                 songTitle = "My Heart Will Go On")
-    ) %>%
-        mutate(line_number = row_number(),
-               words_count = str_count(line, '\\s+')+1,
-               culmul_words = cumsum(words_count))
+    eventExpr = rawLyrics(),
+    valueExpr = {
+      rawLyrics() %>%
+        mutate(
+          line_number = row_number(),
+          words_count = str_count(string = line, pattern = '\\s+') + 1,
+          cumul_words = cumsum(words_count)
+        )
     },
     ignoreNULL = TRUE,
     ignoreInit = FALSE
@@ -400,47 +435,114 @@ server <- function(session, input, output) {
            mutate(
              position = row_number(), 
              word_in_title = case_when( 
-               tolower(word) %in% strsplit(x = tolower(song_name), 
-                                           split = " ")[[1]] ~ "yes", 
+               tolower(word) %in% 
+                 strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes", 
                TRUE ~ "no"
              ),
-             type = ifelse(section_name == "Chorus", "Chorus", "Not chorus"), 
-             last_word = ifelse(position == culmul_words, "yes", "no")
+             type = ifelse(
+               test = section_name == "Chorus", 
+               yes = "Chorus",
+               no = "Not chorus"
+             ), 
+             last_word = ifelse(
+               test = position == cumul_words,
+               yes = "yes",
+               no = "no"
+             )
            )
     },
     ignoreNULL = TRUE
   )
   
+  ## Display sampling selector ----
+  observeEvent(
+    eventExpr = input$pickSong,
+    handlerExpr = {
+      if (input$pickSong != "Pick a song") {
+        output$samplingSelector <- renderUI(
+          expr = {
+            tagList(
+              selectInput(
+                inputId = "samplingType", 
+                label = "Select a sampling method",
+                choices = list(
+                  "Pick a method" = "none",
+                  "Simple Random Sampling" = "srs",
+                  "Systematic Sampling" = "systematic",
+                  "Cluster Sampling" = "cluster",
+                  "Stratified Sampling" = "stratified"
+                )
+              )
+            )
+          }
+        )
+      }
+    }
+  )
+  
+  ## Display sampling size ----
+  observeEvent(
+    eventExpr = input$samplingType,
+    handlerExpr = {
+      if (input$samplingType != "none" & !is.null(input$samplingType)) {
+        output$sampleSizeAll <- renderUI(
+          expr = {
+            tagList(
+              sliderInput(
+                inputId = "sampleSize_all",
+                label = "Sample size",
+                min = 1,
+                max = 20,
+                value = 10,
+                step = 1
+              )
+            )
+          }
+        )
+        updateButton(
+          session = session,
+          inputId = "GenPoem",
+          disabled = FALSE
+        )
+      } else {
+        output$sampleSizeAll <- renderUI({NULL})
+        updateButton(
+          session = session,
+          inputId = "GenPoem",
+          disabled = TRUE
+        )
+      }
+
+    }
+  )
  
   ## Sampling Type Actions ----
-  
   sampledValues <- reactiveValues(words = NULL, lines = NULL)
   observeEvent(
     eventExpr = input$samplingType,
     handlerExpr = {
-      output$sampleSize_all1 <- renderUI({
-        if (input$samplingType == "cluster"){
-          sliderInput("sampleSize_all", "Sample Size", value = 10, min = 1, 
-                      step = 1, max = nrow(songLines()))
-        } else if (input$samplingType == "systematic"){
-          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, 
-                      step = 1, max = floor(nrow(songWords()) / input$kSystematic))
-        } else {
-          sliderInput("sampleSize_all", "Sample Size", value = 20, min = 1, 
-                      step = 1, max = nrow(songWords()))
-        }
-      })
-      
+      newMax <- switch(
+        EXPR = input$samplingType,
+        cluster = nrow(songLines()),
+        systematic = floor(nrow(songWords()) / input$kSystematic),
+        nrow(songWords())
+      )
+      updateSliderInput(
+        session = session,
+        inputId = "sampleSize_all",
+        max = newMax
+      )
     },
     ignoreNULL = TRUE,
     ignoreInit = TRUE
   )
   
-  
+  ## Generate the poem ----
   observeEvent(
-    eventExpr = input$GenPoem,  # tied to the button 
+    eventExpr = input$GenPoem,
     handlerExp = {
-      if (input$samplingType == "srs"){
+      ### Get sample ----
+      if (input$samplingType == "srs") {
         sampledValues$words <- songWords() %>% 
           slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
           arrange(position)
@@ -463,36 +565,31 @@ server <- function(session, input, output) {
             to = input$sampleSize_all*input$kSystematic,
             by = input$kSystematic)
           )
-      } 
-      else {
+      } else {
       sampledValues$lines <- songLines() %>%
         slice_sample(n = input$sampleSize_all, replace = FALSE) %>%
         arrange(line_number)
       }
       
-      
-      output$poem_all <- renderUI({
-        if (input$samplingType == "cluster"){
-        HTML(paste0(sampledValues$lines$line, collapse = "<br>")) 
-      } else {
-        pastedWord <- NULL
-        for(i in 1:length(sampledValues$words$word)){
-          pastedWord <- paste(pastedWord, sampledValues$words$word[i], sep = " ")
-          if(sampledValues$words$last_word[i] == "yes"){
-            pastedWord <- paste(pastedWord, "<br>")
-          }
+      ### Display poem
+      output$poem_all <- renderUI(
+        expr = {
+          if (input$samplingType == "cluster") {
+            HTML(paste0(sampledValues$lines$line, collapse = "<br>")) 
+          } else {
+            pastedWord <- NULL
+            for (i in 1:length(sampledValues$words$word)) {
+              pastedWord <- paste(pastedWord, sampledValues$words$word[i], sep = " ")
+              if (sampledValues$words$last_word[i] == "yes") {
+                pastedWord <- paste(pastedWord, "<br>")
+              }
+            }
+            HTML(paste0(pastedWord, collapse = " "))
+          } 
         }
-        HTML(paste0(pastedWord, collapse = " "))
-      } 
-      
-    })
-    
+      )
     }
-    
   )
-  
-
-  
 }
 
 boastUtils::boastApp(ui = ui, server = server)

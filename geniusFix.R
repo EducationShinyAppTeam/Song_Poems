@@ -41,6 +41,7 @@ get_lyrics <- function(session) {
          section_artist = section_artist[!section_tags], song_name = song, 
          artist_name = artist)
 }
+
 assignInNamespace("get_lyrics", get_lyrics, "geniusr")
 
 # Scrape Genius Webpage with lyrics ----

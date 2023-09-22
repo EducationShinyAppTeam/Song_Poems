@@ -1,11 +1,11 @@
-Title: Song Poems - Sampling Songs to Poems
+Title: Sampling Song Lyrics to Poems
 ShortName: Song Poems
 Date: 2022-11-30
 Lifecycle: experimental
 Authors@R: c(
     person(given = "Nurul Syafiqah", family = "M. Hamdi", role = c("aut", "cre")),
     person(given = "Neil", family = "Hatfield", role = c("aut")),
-    person(given = "Dennis", family = "Pearl", role = c("cre", "ctb"))
+    person(given = "Dennis", family = "Pearl", role = c("aut"))
   )
 Chapter: Chapter 9
 Description: This app is focused on the four sampling methods: simple random, stratified, systematic, and cluster sampling.
