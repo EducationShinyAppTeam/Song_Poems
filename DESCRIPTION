@@ -4,8 +4,8 @@ Date: 2022-11-30
 Lifecycle: experimental
 Authors@R: c(
     person(given = "Nurul Syafiqah", family = "M. Hamdi", role = c("aut", "cre")),
-    person(given = "Neil", family = "Hatfield", role = c("aut")),
-    person(given = "Dennis", family = "Pearl", role = c("aut"))
+    person(given = "Dennis", family = "Pearl", role = c("aut")),
+    person(given = "Neil", family = "Hatfield", role = c("aut"))
   )
 Chapter: Chapter 9
 Description: This app is focused on the four sampling methods: simple random, stratified, systematic, and cluster sampling.
@@ -13,8 +13,8 @@ LearningObjectives: c(
     "The student will learn different type of sampling methods by pulling the songs lyrics to generate poems."
   )
 DisplayMode: Normal
-URL: https://psu-eberly.shinyapps.io/Sample_App
-BugReports: https://github.com/EducationShinyAppTeam/Sample_App/issues 
+URL: https://psu-eberly.shinyapps.io/Song_Poems
+BugReports: https://github.com/EducationShinyAppTeam/Song_Poems/issues 
 License: CC-BY-NC-SA-4.0
 Tags: simulation
 Type: Shiny

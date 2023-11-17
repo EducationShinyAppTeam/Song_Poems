@@ -1,17 +1,17 @@
 library(rlang)
-library(geniusr)
+# library(geniusr)
 library(dplyr)
-library(tidytext)
+# library(tidytext)
 library(rvest)
 library(xml2)
 
 
 boastGetLyrics2 <- function(songDB, artist, song) {
-  url <- songDB %>% 
+  url <- songDB %>%
     filter(Artist == artist, Song == song) %>%
     select(url) %>%
     as.character()
-  
+
   mainPage <- read_html(url)
   lyrics <- mainPage %>% html_elements(xpath = '//div[contains(@class, "Lyrics__Container")]')
   xml_find_all(lyrics, ".//br") %>% xml_add_sibling("p", "\n")
@@ -20,7 +20,7 @@ boastGetLyrics2 <- function(songDB, artist, song) {
   lyrics <- unlist(strsplit(lyrics, split = "\n"))
   lyrics <- grep(pattern = "[[:alnum:]]", lyrics, value = TRUE)
   if (is_empty(lyrics)) {
-    return(tibble(line = NA, section_name = NA, section_artist = NA, 
+    return(tibble(line = NA, section_name = NA, section_artist = NA,
                   song_name = song, artist_name = artist))
   }
   section_tags <- nchar(gsub(pattern = "\\[.*\\]", "", lyrics)) == 0
@@ -30,9 +30,9 @@ boastGetLyrics2 <- function(songDB, artist, song) {
   section_name <- sapply(sections, "[", 1)
   section_artist <- sapply(sections, "[", 2)
   section_artist[is.na(section_artist)] <- artist
-  
-  lyricsOut <- tibble(line = lyrics[!section_tags], section_name = section_name[!section_tags], 
-         section_artist = section_artist[!section_tags], song_name = song, 
+
+  lyricsOut <- tibble(line = lyrics[!section_tags], section_name = section_name[!section_tags],
+         section_artist = section_artist[!section_tags], song_name = song,
          artist_name = artist)
   return(lyricsOut)
 }
