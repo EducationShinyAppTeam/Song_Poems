@@ -5,7 +5,7 @@
 ![year](https://img.shields.io/badge/year-2022-lightgrey)
 ![new](https://img.shields.io/badge/lifecycle-newapp-brightgreen)
 
-![App Screenshot](../docs/screenshot1.png)
+![App Screenshot](../docs/screenshot.png)
 
 # App Description
 This app is used to let the student learn about the concept of all four sampling methods: cluster, stratified, systematic, and simple random sampling.
