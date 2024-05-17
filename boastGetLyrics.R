@@ -1,7 +1,5 @@
 library(rlang)
-# library(geniusr)
 library(dplyr)
-# library(tidytext)
 library(rvest)
 library(xml2)
 
@@ -9,7 +7,7 @@ library(xml2)
 boastGetLyrics2 <- function(songDB, artist, song) {
   url <- songDB %>%
     filter(Artist == artist, Song == song) %>%
-    select(url) %>%
+    dplyr::select(url) %>%
     as.character()
 
   mainPage <- read_html(url)

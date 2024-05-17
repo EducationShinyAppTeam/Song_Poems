@@ -6,13 +6,9 @@ library(boastUtils)
 library(dplyr)
 library(stringr)
 library(tidytext)
-# library(geniusr)
-# library(htmltools)
 library(googlesheets4)
 library(xml2)
 
-
-# source("geniusFix.R")
 source("boastGetLyrics.R")
 
 # Define UI ----
@@ -99,7 +95,7 @@ ui <- list(
             boastUtils::citeApp(),
             br(),
             br(),
-            div(class = "updated", "Last Update: 10/26/23 by NJH.")
+            div(class = "updated", "Last Update: 5/17/24 by NJH.")
           )
         ),
         ### Prerequisites Page ----
@@ -253,7 +249,7 @@ ui <- list(
               width = 6,
               h2("Poem Generated"),
               br(),
-              uiOutput(outputId = "poem_all")
+              uiOutput(outputId = "resultPoem")
             )
           )
         ),
@@ -283,8 +279,8 @@ ui <- list(
           p(
             class = "hangingindent",
             "Chang, W., Cheng, J., Allaire, J., Sievert, C., Schloerke. B.,
-            Xie, Y., Allen, J., McPherson, J., Dipert, A., and Borges, B. (2023).
-            shiny: Web application framework for R. (v. 1.7.5.1). [R package].
+            Xie, Y., Allen, J., McPherson, J., Dipert, A., and Borges, B. (2024).
+            shiny: Web application framework for R. (v. 1.8.1.1). [R package].
             Available from https://CRAN.R-project.org/package=shiny"
           ),
           p(
@@ -295,8 +291,8 @@ ui <- list(
           ),
           p(
             class = "hangingindent",
-            "Henry, L., and Wickham, H. (2023). rlang: Functions for base types
-            and core R and 'Tidyverse' features. (v. 1.1.1). [R package].
+            "Henry, L., and Wickham, H. (2024). rlang: Functions for base types
+            and core R and 'Tidyverse' features. (v. 1.1.3). [R package].
             Available from https://CRAN.R-project.org/package=rlang"
           ),
           p(
@@ -307,39 +303,45 @@ ui <- list(
           ),
           p(
             class = "hangingindent",
-            "Perrier, V., Meyer, F., and Granjon, D. (2023). shinyWidgets:
-            Custom inputs widgets for shiny. (v. 0.8.0). [R package]. Available
+            "Perrier, V., Meyer, F., and Granjon, D. (2024). shinyWidgets:
+            Custom inputs widgets for shiny. (v. 0.8.6). [R package]. Available
             from https://CRAN.R-project.org/package=shinyWidgets"
           ),
           p(
             class = "hangingindent",
             "Silge, J., and Robinson, D. (2016). tidytext: Text mining and
             analysis using tidy data principles in R.", tags$em("The Open Journal,"),
-            "1(3). (v. 0.4.1). [R package]. Available from
+            "1(3). (v. 0.4.2). [R package]. Available from
             http://dx.doi.org/10.21105/joss.00037"
           ),
           p(
             class = "hangingindent",
-            "Wickham, H. (2022). rvest: Easily harvest (scrape) web pages.
-            (v. 1.0.3). [R package]. Available from
+            "Stoudt, S. (2023). Sampled Poems Contain Multitudes.",
+            tags$em("Math Voices-Feature Column."), "Amercian Mathematical Society.
+            Available from https://mathvoices.ams.org/featurecolumn/2023/12/01/sampled-poems-contain-multitudes/"
+          ),
+          p(
+            class = "hangingindent",
+            "Wickham, H. (2024). rvest: Easily harvest (scrape) web pages.
+            (v. 1.0.4). [R package]. Available from
             https://CRAN.R-project.org/package=rvest"
           ),
           p(
             class = "hangingindent",
-            "Wickham, H. (2022). stringr: Simple, consistent wrappers for
-             common string operations. (v. 1.5.0). [R package].
+            "Wickham, H. (2023). stringr: Simple, consistent wrappers for
+             common string operations. (v. 1.5.1). [R package].
              Available from https://CRAN.R-project.org/package=stringr"
           ),
           p(
             class = "hangingindent",
             "Wickham, H., François, R., Henry, L., Müller, K., and Vaughan, D.
-            (2023). dplyr: A grammar of data manipulation. (v. 1.1.3).
+            (2023). dplyr: A grammar of data manipulation. (v. 1.1.4).
             [R package]. Available from https://CRAN.R-project.org/package=dplyr"
           ),
           p(
             class = "hangingindent",
             "Wickham, H., Hester, J., and Ooms, J. (2023). xml2: Parse XML.
-            (v. 1.3.5). [R package]. Available from
+            (v. 1.3.6). [R package]. Available from
             https://CRAN.R-project.org/package=xml2"
           ),
           br(),
@@ -590,8 +592,8 @@ server <- function(session, input, output) {
         arrange(line_number)
       }
 
-      ### Display poem
-      output$poem_all <- renderUI(
+      ### Display poem ----
+      output$resultPoem <- renderUI(
         expr = {
           if (input$samplingType == "cluster") {
             HTML(paste0(sampledValues$lines$line, collapse = "<br>"))
