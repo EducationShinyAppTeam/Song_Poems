@@ -44,7 +44,7 @@ ui <- list(
 
       tags$div(
         class = "sidebar-logo",
-        boastUtils::psu_eberly_logo("reversed")
+        boastUtils::sidebarFooter()
       )
     ),
     ## Body ----
