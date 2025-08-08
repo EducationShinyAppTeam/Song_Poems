@@ -2,21 +2,44 @@ library(rlang)
 library(dplyr)
 library(rvest)
 library(xml2)
+library(stringr)
+library(curl)
+
+print("This is when the script gets loaded.")
+
+# Test 1A ----
+geturl <- function(url, handle) {
+  curl::curl_fetch_memory(url = url, handle = handle)$content
+}
 
 
 boastGetLyrics2 <- function(songDB, artist, song) {
+  print("getLyrics Running")
   url <- songDB %>%
     filter(Artist == artist, Song == song) %>%
     dplyr::select(url) %>%
     as.character()
 
-  mainPage <- read_html(url)
+  # Test 1B ----
+  h <- curl::new_handle()
+  # curl::handle_setopt(h, ssl_verifypeer = 0)
+
+  # mainPage <- read_html(url)
+  # Test 1C ----
+  mainPage <- read_html(geturl(url, h))
+  rm(h)
+
   lyrics <- mainPage %>% html_elements(xpath = '//div[contains(@class, "Lyrics__Container")]')
   xml_find_all(lyrics, ".//br") %>% xml_add_sibling("p", "\n")
   xml_find_all(lyrics, ".//br") %>% xml_remove()
   lyrics <- html_text(lyrics, trim = TRUE)
+  # Strip out the additional text that is getting captured ----
+  firstPosition <- str_locate(string = lyrics[1], pattern = "\\[")
+  str_sub(string = lyrics[1], start = 1, end = firstPosition[1, 1] - 1) <- ""
+
   lyrics <- unlist(strsplit(lyrics, split = "\n"))
   lyrics <- grep(pattern = "[[:alnum:]]", lyrics, value = TRUE)
+
   if (is_empty(lyrics)) {
     return(tibble(line = NA, section_name = NA, section_artist = NA,
                   song_name = song, artist_name = artist))

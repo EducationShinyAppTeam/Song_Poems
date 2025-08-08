@@ -8,6 +8,9 @@ library(stringr)
 library(tidytext)
 library(googlesheets4)
 library(xml2)
+library(rvest)
+library(rlang)
+library(curl)
 
 source("boastGetLyrics.R")
 
@@ -370,7 +373,6 @@ server <- function(session, input, output) {
   observeEvent(
     eventExpr = input$info,
     handlerExpr = {
-      print(rawLyrics())
       sendSweetAlert(
         session = session,
         title = "Instructions",
@@ -406,76 +408,157 @@ server <- function(session, input, output) {
     }
   )
 
-  ## Get and store raw lyrics ----
-  rawLyrics <- eventReactive(
+  ## Alternative Lyrics approach ----
+  rawLyrics <- reactiveVal(value = NULL, label = "RawLyrics")
+  songLines <- reactiveVal(value = NULL, label = "SongLines")
+  songWords <- reactiveVal(value = NULL, label = "SongWords")
+
+  observeEvent(
     eventExpr = input$pickSong,
-    valueExpr = {
+    handlerExpr = {
+      print("Time 0")
+      print(rawLyrics())
       if (input$pickSong == "Pick a song") {
-        rawLyrics <- tibble(
-          line = "No song selected",
-          section_name = "Verse 1",
-          section_artist = "None",
-          song_name = "None",
-          artist_name = "None"
+        rawLyrics(
+          tibble(
+            line = "No song selected",
+            section_name = "Verse 1",
+            section_artist = "None",
+            song_name = "None",
+            artist_name = "None"
+          )
         )
       } else {
         songInfo <- str_split_1(string = input$pickSong, pattern = "--")
-        rawLyrics <- boastGetLyrics2(
+        print("Time 1")
+        print(songInfo)
+        temp <- boastGetLyrics2(
           songDB = songDB(),
           artist = songInfo[2],
           song = songInfo[1]
         )
-      }
-      return(rawLyrics)
-    },
-    label = "gettingRawLyrics"
-  )
-
-  ## Get Song Lines ----
-  songLines <- eventReactive(
-    eventExpr = rawLyrics(),
-    valueExpr = {
-      rawLyrics() %>%
-        mutate(
-          line_number = row_number(),
-          words_count = str_count(string = line, pattern = '\\s+') + 1,
-          cumul_words = cumsum(words_count)
+        print(temp)
+        rawLyrics(
+          boastGetLyrics2(
+            songDB = songDB(),
+            artist = songInfo[2],
+            song = songInfo[1]
+          )
         )
-    },
-    ignoreNULL = TRUE,
-    ignoreInit = FALSE
-  )
+      }
+      print('Time 2')
+      print(rawLyrics())
 
-  ## Parse Words ----
-  songWords <- eventReactive(
-    eventExpr = songLines(),
-    valueExpr = {
-      unnest_tokens(
-           tbl = songLines(),
-           output = "word",
-           input = line
-         ) %>%
-           mutate(
-             position = row_number(),
-             word_in_title = case_when(
-               tolower(word) %in%
-                 strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes",
-               TRUE ~ "no"
-             ),
-             type = ifelse(
-               test = section_name == "Chorus",
-               yes = "Chorus",
-               no = "Not chorus"
-             ),
-             last_word = ifelse(
-               test = position == cumul_words,
-               yes = "yes",
-               no = "no"
-             )
-           )
+      # songLines(
+      #   rawLyrics() %>%
+      #     mutate(
+      #       line_number = row_number(),
+      #       words_count = str_count(string = line, pattern = '\\s+') + 1,
+      #       cumul_words = cumsum(words_count)
+      #     )
+      # )
+
+      # songWords(
+      #   unnest_tokens(
+      #     tbl = songLines(),
+      #     output = "word",
+      #     input = line
+      #   ) %>%
+      #     mutate(
+      #       position = row_number(),
+      #       word_in_title = case_when(
+      #         tolower(word) %in%
+      #           strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes",
+      #         TRUE ~ "no"
+      #       ),
+      #       type = ifelse(
+      #         test = section_name == "Chorus",
+      #         yes = "Chorus",
+      #         no = "Not chorus"
+      #       ),
+      #       last_word = ifelse(
+      #         test = position == cumul_words,
+      #         yes = "yes",
+      #         no = "no"
+      #       )
+      #     )
+      # )
+
     },
+    ignoreInit = TRUE,
     ignoreNULL = TRUE
   )
+
+  ## Get and store raw lyrics ----
+  # rawLyrics <- eventReactive(
+  #   eventExpr = input$pickSong,
+  #   valueExpr = {
+  #     if (input$pickSong == "Pick a song") {
+  #       rawLyrics <- tibble(
+  #         line = "No song selected",
+  #         section_name = "Verse 1",
+  #         section_artist = "None",
+  #         song_name = "None",
+  #         artist_name = "None"
+  #       )
+  #     } else {
+  #       songInfo <- str_split_1(string = input$pickSong, pattern = "--")
+  #       rawLyrics <- boastGetLyrics2(
+  #         songDB = songDB(),
+  #         artist = songInfo[2],
+  #         song = songInfo[1]
+  #       )
+  #     }
+  #     return(rawLyrics)
+  #   },
+  #   label = "gettingRawLyrics"
+  # )
+
+  ## Get Song Lines ----
+  # songLines <- eventReactive(
+  #   eventExpr = rawLyrics(),
+  #   valueExpr = {
+  #     rawLyrics() %>%
+  #       mutate(
+  #         line_number = row_number(),
+  #         words_count = str_count(string = line, pattern = '\\s+') + 1,
+  #         cumul_words = cumsum(words_count)
+  #       )
+  #   },
+  #   ignoreNULL = TRUE,
+  #   ignoreInit = FALSE
+  # )
+
+  ## Parse Words ----
+  # songWords <- eventReactive(
+  #   eventExpr = songLines(),
+  #   valueExpr = {
+  #     unnest_tokens(
+  #          tbl = songLines(),
+  #          output = "word",
+  #          input = line
+  #        ) %>%
+  #          mutate(
+  #            position = row_number(),
+  #            word_in_title = case_when(
+  #              tolower(word) %in%
+  #                strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes",
+  #              TRUE ~ "no"
+  #            ),
+  #            type = ifelse(
+  #              test = section_name == "Chorus",
+  #              yes = "Chorus",
+  #              no = "Not chorus"
+  #            ),
+  #            last_word = ifelse(
+  #              test = position == cumul_words,
+  #              yes = "yes",
+  #              no = "no"
+  #            )
+  #          )
+  #   },
+  #   ignoreNULL = TRUE
+  # )
 
   ## Display sampling selector ----
   observeEvent(
