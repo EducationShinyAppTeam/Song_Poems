@@ -13,6 +13,7 @@ library(rlang)
 library(curl)
 
 source("boastGetLyrics.R")
+songDatabase <- readRDS("song_database.rds")
 
 # Define UI ----
 ui <- list(
@@ -408,157 +409,76 @@ server <- function(session, input, output) {
     }
   )
 
-  ## Alternative Lyrics approach ----
-  rawLyrics <- reactiveVal(value = NULL, label = "RawLyrics")
-  songLines <- reactiveVal(value = NULL, label = "SongLines")
-  songWords <- reactiveVal(value = NULL, label = "SongWords")
-
-  observeEvent(
+  # Get and store raw lyrics ----
+  rawLyrics <- eventReactive(
     eventExpr = input$pickSong,
-    handlerExpr = {
-      print("Time 0")
-      print(rawLyrics())
+    valueExpr = {
       if (input$pickSong == "Pick a song") {
-        rawLyrics(
-          tibble(
-            line = "No song selected",
-            section_name = "Verse 1",
-            section_artist = "None",
-            song_name = "None",
-            artist_name = "None"
-          )
+        rawLyrics <- tibble(
+          line = "No song selected",
+          section_name = "Verse 1",
+          section_artist = "None",
+          song_name = "None",
+          artist_name = "None"
         )
       } else {
         songInfo <- str_split_1(string = input$pickSong, pattern = "--")
-        print("Time 1")
-        print(songInfo)
-        temp <- boastGetLyrics2(
-          songDB = songDB(),
+        rawLyrics <- boastGetLyrics3(
+          database = songDatabase,
           artist = songInfo[2],
           song = songInfo[1]
         )
-        print(temp)
-        rawLyrics(
-          boastGetLyrics2(
-            songDB = songDB(),
-            artist = songInfo[2],
-            song = songInfo[1]
-          )
-        )
       }
-      print('Time 2')
-      print(rawLyrics())
-
-      # songLines(
-      #   rawLyrics() %>%
-      #     mutate(
-      #       line_number = row_number(),
-      #       words_count = str_count(string = line, pattern = '\\s+') + 1,
-      #       cumul_words = cumsum(words_count)
-      #     )
-      # )
-
-      # songWords(
-      #   unnest_tokens(
-      #     tbl = songLines(),
-      #     output = "word",
-      #     input = line
-      #   ) %>%
-      #     mutate(
-      #       position = row_number(),
-      #       word_in_title = case_when(
-      #         tolower(word) %in%
-      #           strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes",
-      #         TRUE ~ "no"
-      #       ),
-      #       type = ifelse(
-      #         test = section_name == "Chorus",
-      #         yes = "Chorus",
-      #         no = "Not chorus"
-      #       ),
-      #       last_word = ifelse(
-      #         test = position == cumul_words,
-      #         yes = "yes",
-      #         no = "no"
-      #       )
-      #     )
-      # )
-
+      return(rawLyrics)
     },
-    ignoreInit = TRUE,
-    ignoreNULL = TRUE
+    label = "gettingRawLyrics"
   )
 
-  ## Get and store raw lyrics ----
-  # rawLyrics <- eventReactive(
-  #   eventExpr = input$pickSong,
-  #   valueExpr = {
-  #     if (input$pickSong == "Pick a song") {
-  #       rawLyrics <- tibble(
-  #         line = "No song selected",
-  #         section_name = "Verse 1",
-  #         section_artist = "None",
-  #         song_name = "None",
-  #         artist_name = "None"
-  #       )
-  #     } else {
-  #       songInfo <- str_split_1(string = input$pickSong, pattern = "--")
-  #       rawLyrics <- boastGetLyrics2(
-  #         songDB = songDB(),
-  #         artist = songInfo[2],
-  #         song = songInfo[1]
-  #       )
-  #     }
-  #     return(rawLyrics)
-  #   },
-  #   label = "gettingRawLyrics"
-  # )
+  # Get Song Lines ----
+  songLines <- eventReactive(
+    eventExpr = rawLyrics(),
+    valueExpr = {
+      rawLyrics() %>%
+        mutate(
+          line_number = row_number(),
+          words_count = str_count(string = line, pattern = '\\s+') + 1,
+          cumul_words = cumsum(words_count)
+        )
+    },
+    ignoreNULL = TRUE,
+    ignoreInit = FALSE
+  )
 
-  ## Get Song Lines ----
-  # songLines <- eventReactive(
-  #   eventExpr = rawLyrics(),
-  #   valueExpr = {
-  #     rawLyrics() %>%
-  #       mutate(
-  #         line_number = row_number(),
-  #         words_count = str_count(string = line, pattern = '\\s+') + 1,
-  #         cumul_words = cumsum(words_count)
-  #       )
-  #   },
-  #   ignoreNULL = TRUE,
-  #   ignoreInit = FALSE
-  # )
-
-  ## Parse Words ----
-  # songWords <- eventReactive(
-  #   eventExpr = songLines(),
-  #   valueExpr = {
-  #     unnest_tokens(
-  #          tbl = songLines(),
-  #          output = "word",
-  #          input = line
-  #        ) %>%
-  #          mutate(
-  #            position = row_number(),
-  #            word_in_title = case_when(
-  #              tolower(word) %in%
-  #                strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes",
-  #              TRUE ~ "no"
-  #            ),
-  #            type = ifelse(
-  #              test = section_name == "Chorus",
-  #              yes = "Chorus",
-  #              no = "Not chorus"
-  #            ),
-  #            last_word = ifelse(
-  #              test = position == cumul_words,
-  #              yes = "yes",
-  #              no = "no"
-  #            )
-  #          )
-  #   },
-  #   ignoreNULL = TRUE
-  # )
+  # Parse Words ----
+  songWords <- eventReactive(
+    eventExpr = songLines(),
+    valueExpr = {
+      unnest_tokens(
+           tbl = songLines(),
+           output = "word",
+           input = line
+         ) %>%
+           mutate(
+             position = row_number(),
+             word_in_title = case_when(
+               tolower(word) %in%
+                 strsplit(x = tolower(song_name), split = " ")[[1]] ~ "yes",
+               TRUE ~ "no"
+             ),
+             type = ifelse(
+               test = section_name == "Chorus",
+               yes = "Chorus",
+               no = "Not chorus"
+             ),
+             last_word = ifelse(
+               test = position == cumul_words,
+               yes = "yes",
+               no = "no"
+             )
+           )
+    },
+    ignoreNULL = TRUE
+  )
 
   ## Display sampling selector ----
   observeEvent(
